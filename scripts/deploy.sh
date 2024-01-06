@@ -4,8 +4,8 @@ REPOSITORY=/home/ubuntu/app
 cd $REPOSITORY
 
 APP_NAME=BravePeople-Backend
-JAR_NAME=$(ls $REPOSITORY/$APP_NAME/build/libs/ | grep 'SNAPSHOT.jar' | tail -n 1)
-JAR_PATH=$REPOSITORY/$APP_NAME/build/libs/$JAR_NAME
+JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep 'SNAPSHOT.jar' | tail -n 1)
+JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 
 CURRENT_PID=$(pgrep -f $APP_NAME)
 
