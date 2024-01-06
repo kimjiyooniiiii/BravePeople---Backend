@@ -3,11 +3,11 @@ os: linux
 
 files:
   - source:  /
-    destination: /home/ubuntu/buildfiles
+    destination: /home/ubuntu/app
     overwrite: yes
 
 permissions:
-  - object: /home/ubuntu/buildfiles/
+  - object: /home/ubuntu/app/
     owner: ubuntu
     group: ubuntu
 
