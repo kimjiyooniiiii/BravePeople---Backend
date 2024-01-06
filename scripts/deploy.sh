@@ -18,5 +18,5 @@ else
   sleep 5
 fi
 
-echo "> Deploy - $JAR_PATH "
-nohup java -jar $JAR_PATH > /dev/null 2> /dev/null < /dev/null &
+echo "> Deploy - $JAR_NAME "
+nohup java -jar $JAR_NAME > /dev/null 2> /dev/null < /dev/null &
