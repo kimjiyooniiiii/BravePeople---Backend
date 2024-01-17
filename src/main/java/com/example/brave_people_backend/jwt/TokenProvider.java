@@ -2,6 +2,8 @@ package com.example.brave_people_backend.jwt;
 
 import com.example.brave_people_backend.dto.TokenDto;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,9 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
-
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 
 @Slf4j
 @Component
@@ -95,16 +94,22 @@ public class TokenProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        }catch(io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
+        }catch(io.jsonwebtoken.security.SecurityException e) {
+            log.info("Invalid JWT signature.");
+            throw new JwtException("잘못된 JWT 서명.");
+        } catch (MalformedJwtException e) {
+            log.info("Invalid JWT token.");
+            throw new JwtException("유효하지 않은 JWT 토큰");
         }catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
+            log.info("Invalid JWT token.");
+            throw new JwtException("토큰 기한 만료");
         }catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
+            log.info("Unsupported JWT token.");
+            throw new JwtException("지원되지 않는 JWT 토큰");
         }catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
+            log.info("JWT token compact of handler are invalid.");
+            throw new JwtException("토큰 handler 문제");
         }
-        return false;
     }
 
     // 키로 서명을 검증하고 Claims을 추출

@@ -38,8 +38,9 @@ public class AuthService {
     // 로그인 service
     @Transactional
     public TokenDto login(LoginRequestDto loginRequestDto) {
-        // 사용자가 입력한 ID/PW를 기반으로 DB에서 검색해 객체를 반환
+        // loginRequestDto를 UsernamePasswordAuthenticationToken 형식으로 변경
         UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
+
         //authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
         Authentication authenticate = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
@@ -69,7 +70,7 @@ public class AuthService {
         }
 
         // refreshTokenRepository에 정보가 없으면 로그아웃 됨 -> 다시 로그인 해야함
-        RefreshToken refreshToken = refreshTokenRepository.findByMemberId(memberId)
+        RefreshToken refreshToken = refreshTokenRepository.findLatestRefreshToken(memberId)
                 .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
 
         // redis에 저장된 refreshToken과 사용자가 입력한 refreshToken 비교

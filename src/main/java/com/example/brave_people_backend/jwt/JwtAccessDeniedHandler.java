@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+// 인가 실패시 핸들링 - 403에러
 @Component
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
-    // 권한이 없이 접근할 때, 403에러 응답
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.sendError(HttpServletResponse.SC_FORBIDDEN);

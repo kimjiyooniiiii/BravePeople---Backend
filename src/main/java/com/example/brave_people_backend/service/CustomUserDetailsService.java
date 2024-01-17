@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,16 +24,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Member> member = memberRepository.findByUsername(username);
-        if(member.isPresent()) {
-            return createUserDetails(member.get());
-        }else{
-            System.out.print(username + " -> DB에서 찾을 수 없습니다.");
-            return null;
-        }
-        /*return memberRepository.findByUsername(username)
+
+        return memberRepository.findByUsername(username)
                 .map(this::createUserDetails)
-                .orElseThrow(() -> new UsernameNotFoundException(username + " -> DB에서 찾을 수 없습니다."));*/
+                .orElseThrow(() -> new UsernameNotFoundException(username + " -> DB에서 찾을 수 없습니다."));
     }
 
     // UserDetails를 만들어 반환
