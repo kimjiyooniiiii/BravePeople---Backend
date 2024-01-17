@@ -61,7 +61,7 @@ public class SecurityConfig {
 
                 // URL 접근 권한 설정
                 .authorizeHttpRequests((a) -> a
-                        .requestMatchers("/auth/**").permitAll()    // 로그인, 회원가입은 접근 허용
+                        .requestMatchers("/auth/**", "/member/pw", "/posts").permitAll()    // 로그인, 회원가입은 접근 허용
                         .anyRequest().authenticated()                       // 나머지 페이지는 인증시 허용
                 )
 
