@@ -26,6 +26,9 @@ public class Member {
 
     private String nickname;
 
+    @Column(columnDefinition = "TINYINT(1)")
+    private boolean gender;
+
     @Enumerated(EnumType.STRING)
     private Authority authority;
 }

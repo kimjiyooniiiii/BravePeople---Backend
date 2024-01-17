@@ -36,4 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
+<<<<<<< HEAD
 application-env.properties
+=======
+### 환경변수 파일 ###
+application-env.properties
+>>>>>>> d78b80f3fbfc4d90b887852dcfd03c549105b376
