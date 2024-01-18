@@ -14,6 +14,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
 
+    // 게시판 전체 불러오기
     public List<PostListResponseDto> getPostList(String type, Integer distance, Integer lastid, Integer amount) {
 
         System.out.println("type = " + type);
