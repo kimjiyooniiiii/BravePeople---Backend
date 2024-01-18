@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// 임시 테스트 서비스 입니다.
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
