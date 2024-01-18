@@ -23,6 +23,14 @@ jobs:
       with:
         java-version: '17'
         distribution: 'corretto'
+
+    - name: add Application-env.properties
+      run: touch ./src/main/resources/application-env.properties
+      shell: bash
+        
+    - name: copy Application.properties
+      run: echo "${{ secrets.PROPERTIES }}" >> ./src/main/resources/application-env.properties
+      shell: bash
         
     - name: gradlew authority
       run: chmod +x ./gradlew
