@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 // 위치 변경 요청 Dto
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class LocationRequestDto {

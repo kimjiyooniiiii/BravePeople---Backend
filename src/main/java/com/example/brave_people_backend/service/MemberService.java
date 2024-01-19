@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 // 임시 테스트 서비스 입니다.
 @Service
 @RequiredArgsConstructor
@@ -32,10 +34,14 @@ public class MemberService {
     }
 
     //위치 정보 변경
+    @Transactional
     public LocationResponseDto updateLocation(LocationRequestDto locationRequestDto) {
 
-        return LocationResponseDto.of(memberRepository.findByIdOne(SecurityUtil.getCurrentId()),
-                locationRequestDto.getLat(), locationRequestDto.getLng());
+        Member findMember = memberRepository.findByIdOne(SecurityUtil.getCurrentId());
+
+        findMember.changeLatAndLng(new BigDecimal(locationRequestDto.getLat()), new BigDecimal(locationRequestDto.getLng()));
+
+        return LocationResponseDto.of(findMember);
     }
 
 }

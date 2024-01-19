@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Getter
 @Builder
@@ -18,10 +17,11 @@ public class LocationResponseDto {
     private BigDecimal lat;
     private BigDecimal lng;
 
-    public static LocationResponseDto of(Member member, String lat, String lng) {
+    // LocationResponseDto 객체를 생성하는 함수 (of 함수를 이용함으로서 유지보수 편리)
+    public static LocationResponseDto of(Member member) {
         return LocationResponseDto.builder()
-                .lat(new BigDecimal(lat))
-                .lng(new BigDecimal(lng))
+                .lat(member.getLat())
+                .lng(member.getLng())
                 .build();
     }
 }

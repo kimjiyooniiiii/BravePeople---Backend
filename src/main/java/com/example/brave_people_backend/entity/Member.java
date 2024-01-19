@@ -55,4 +55,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
+    public void changeLatAndLng(BigDecimal lat, BigDecimal lng) {
+        this.lat = lat;
+        this.lng = lng;
+    }
+
 }
