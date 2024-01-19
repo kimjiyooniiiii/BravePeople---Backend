@@ -13,6 +13,11 @@ public class SecurityUtil {
     public static Long getCurrentId() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        //비로그인 사용자일 경우 null 반환
+        if (authentication.getName().equals("anonymousUser")) {
+            return null;
+        }
+
         if(authentication == null || authentication.getName() == null) {
             throw new RuntimeException("Security Context에 인증 정보가 없습니다.");
         }

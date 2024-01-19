@@ -7,30 +7,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
+/**
+ * (GET /posts) 응답 DTO
+ */
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostListResponseDto {
 
-    private String type;
-    private String title;
-    private int price;
-    private String gender;
-    private String createdAt;
-    private String category;
-    private Long postId;
+    private String hasNext;
+    private List<PostListVo> data;
 
-    public static PostListResponseDto of(Post post) {
+    public static PostListResponseDto of(boolean hasNext, List<PostListVo> data) {
         return PostListResponseDto.builder()
-                .type(post.getAct().toString())
-                .title(post.getTitle())
-                .price(post.getPrice())
-                .gender(post.getMember().isGender() ? "여성" : "남성") //남자면 false, 여자면 true
-                .createdAt(post.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")))
-                .category(post.getCategory().toString())
-                .postId(post.getPostId())
+                .hasNext(hasNext ? "true" : "false")
+                .data(data)
                 .build();
     }
 

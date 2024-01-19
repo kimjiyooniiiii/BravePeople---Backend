@@ -18,11 +18,11 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping
-    public List<PostListResponseDto> getPostList(@RequestParam("type") String type,
+    public PostListResponseDto getPostList(@RequestParam("type") String type,
                                                  @RequestParam(name = "distance", required = false) Integer distance,
-                                                 @RequestParam(name = "lastid", required = false) Integer lastid,
+                                                 @RequestParam(name = "page") Integer page,
                                                  @RequestParam("amount") Integer amount) {
 
-        return boardService.getPostList(type, distance, lastid, amount);
+        return boardService.getPostList(type, distance, page, amount);
     }
 }
