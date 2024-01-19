@@ -32,4 +32,10 @@ public class AuthController {
     public ResponseEntity<TokenDto> reissue(@RequestBody TokenRequestDto tokenRequestDto) {
         return ResponseEntity.ok(authService.reissue(tokenRequestDto));
     }
+
+    //이메일로 회원 찾기
+    @GetMapping("/username")
+    public ResponseEntity<UsernameResponseDto> email(@RequestParam("email") String email) {
+        return ResponseEntity.ok(authService.findByEmail(email));
+    }
 }

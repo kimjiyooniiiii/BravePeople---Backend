@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -86,5 +88,11 @@ public class AuthService {
         refreshTokenRepository.save(newRefreshToken);
 
         return tokenDto;
+    }
+
+    // 이메일로 Member 찾기
+    @Transactional
+    public UsernameResponseDto findByEmail(String email) {
+        return UsernameResponseDto.of(memberRepository.findByEmail(email));
     }
 }

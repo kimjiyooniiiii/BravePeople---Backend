@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter
 @Builder
@@ -31,4 +33,11 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private Authority authority;
+
+    @Column(precision = 18, scale=15, nullable = false)
+    private BigDecimal lat;
+
+    @Column(precision = 18, scale=15, nullable = false)
+    private BigDecimal lng;
+
 }
