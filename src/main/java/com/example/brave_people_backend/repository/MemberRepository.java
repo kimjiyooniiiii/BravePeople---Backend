@@ -2,6 +2,8 @@ package com.example.brave_people_backend.repository;
 
 import com.example.brave_people_backend.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -14,4 +16,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 같은 아이디 있는지 검색
     boolean existsByUsername(String username);
+
+    // 이메일로 사용자 검색
+    Member findByEmail(@Param("email") String email);
+
+    @Query("select m from Member m where m.memberId = :memberId")
+    Member findByIdOne(Long memberId);
+
+    // 같은 이메일 있는지 검색
+    boolean existsByEmail(String email);
 }

@@ -10,6 +10,8 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter
 @Builder
@@ -55,4 +57,10 @@ public class Member {
 
     @Column(length = 5, updatable = false)
     private String name;
+
+    public void changeLatAndLng(BigDecimal lat, BigDecimal lng) {
+        this.lat = lat;
+        this.lng = lng;
+    }
+
 }
