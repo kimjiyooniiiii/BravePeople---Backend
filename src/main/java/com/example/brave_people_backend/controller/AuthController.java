@@ -38,4 +38,17 @@ public class AuthController {
     public ResponseEntity<UsernameResponseDto> email(@RequestParam("email") String email) {
         return ResponseEntity.ok(authService.findByEmail(email));
     }
+    
+    //이메일 중복확인 및 인증
+    @GetMapping("/email")
+    public void confirmEmail(@RequestParam("email") String email) {
+        authService.confirmEmail(email);
+    }
+
+    //이메일 인증 링크 클릭시 프론트에 링크 전송 후 받는 컨트롤러 메서드
+    @GetMapping("/mailcode")
+    public String authMailCode(@RequestParam("email") int emailId, @RequestParam("code") int authCode) {
+        return authService.authMailCode(emailId, authCode);
+    }
+
 }
