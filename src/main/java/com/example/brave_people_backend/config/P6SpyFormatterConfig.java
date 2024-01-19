@@ -9,6 +9,10 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Locale;
 
+/**
+ * P6Spy : 쿼리문 출력 결과 확인하는 라이브러리
+ * 이 Config 클래스는 쿼리문 가독성을 위한 들여쓰기 및 줄바꿈을 위한 설정파일
+ */
 @Configuration
 public class P6SpyFormatterConfig implements MessageFormattingStrategy {
 
