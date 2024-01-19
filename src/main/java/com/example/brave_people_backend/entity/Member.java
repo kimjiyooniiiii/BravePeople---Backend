@@ -22,7 +22,7 @@ public class Member {
     private Long memberId;
 
     @Column(length = 20, unique = true, updatable = false)
-    private String username;
+    private String username;    // 아이디
 
     private String pw;
 
@@ -36,7 +36,7 @@ public class Member {
     private boolean gender;
 
     @ColumnDefault("37.566770140877412") //위치 정보가 없는 경우 default 위도 : 서울특별시청
-    @Column(precision = 18, scale=15, nullable = false)
+    @Column(precision = 18, scale=15, nullable = false) //전체 자릿수는 18개, 소수점 자릿수는 15개
     private BigDecimal lat;
 
     @ColumnDefault("126.978640955202641") //위치 정보가 없는 경우 default 경도 : 서울특별시청
@@ -52,4 +52,7 @@ public class Member {
     @Column(columnDefinition = "varchar(20)", nullable = false)
     @Enumerated(EnumType.STRING)
     private Authority authority;
+
+    @Column(length = 5, updatable = false)
+    private String name;
 }

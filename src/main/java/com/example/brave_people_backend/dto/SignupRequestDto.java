@@ -2,6 +2,9 @@ package com.example.brave_people_backend.dto;
 
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.enumclass.Authority;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,13 +17,28 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class SignupRequestDto {
 
+    @NotBlank @Size(min = 2, max = 5)
     private String name;
+
+    @NotBlank @Size(min = 2, max = 2)
     private String gender;
+
+    @NotBlank @Size(min = 6, max = 20)
     private String username;
+
+    @NotBlank @Size(min = 8) @Email
     private String pw;
+
+    @NotBlank @Size(max = 30)
     private String email;
+
+    @NotBlank @Size(max = 15)
     private String nickname;
+
+    @NotBlank
     private String lat;
+
+    @NotBlank
     private String lng;
 
     public Member toMember(PasswordEncoder passwordEncoder) {
@@ -33,6 +51,7 @@ public class SignupRequestDto {
                 .lat(new BigDecimal(lat))
                 .lng(new BigDecimal(lng))
                 .authority(Authority.ROLE_USER)
+                .name(name)
                 .build();
     }
 

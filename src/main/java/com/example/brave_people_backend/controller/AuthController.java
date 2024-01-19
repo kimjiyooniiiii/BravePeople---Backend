@@ -2,6 +2,7 @@ package com.example.brave_people_backend.controller;
 
 import com.example.brave_people_backend.dto.*;
 import com.example.brave_people_backend.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,13 @@ public class AuthController {
     // 회원가입 controller
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/signup")
-    public SignupResponseDto signup(@RequestBody SignupRequestDto signupRequestDto){
+    public SignupResponseDto signup(@RequestBody @Valid SignupRequestDto signupRequestDto){
         return authService.signup(signupRequestDto);
     }
 
     // 로그인 controller
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         return ResponseEntity.ok(authService.login(loginRequestDto));
     }
 

@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -37,7 +39,7 @@ public class AuthService {
 
     // 로그인 service
     @Transactional
-    public TokenDto login(LoginRequestDto loginRequestDto) {
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         // loginRequestDto를 UsernamePasswordAuthenticationToken 형식으로 변경
         UsernamePasswordAuthenticationToken authenticationToken = loginRequestDto.toAuthentication();
 
@@ -52,10 +54,20 @@ public class AuthService {
                 .refreshToken(tokenDto.getRefreshToken())
                 .build();
 
+
         // refresh token -> db 저장
         refreshTokenRepository.save(refreshToken);
+        Optional<Member> member = memberRepository.findById(Long.parseLong(authenticate.getName()));
 
-        return tokenDto;
+        LoginResponseDto loginResponseDto = LoginResponseDto.builder()
+                .memberId(authenticate.getName())
+                .nickname(member.get().getNickname())
+                .lat(String.valueOf(member.get().getLat()))
+                .lng(String.valueOf(member.get().getLng()))
+                .tokenDto(tokenDto)
+                .build();
+
+        return loginResponseDto;
     }
 
     // refresh token으로 access token 재발급 받기
