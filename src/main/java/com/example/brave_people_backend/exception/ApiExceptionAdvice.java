@@ -37,4 +37,16 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
                 .body(apiExceptionDto);
     }
 
+    // 회원가입 시, 중복된 아이디, 닉네임이 있을 경우
+    @ExceptionHandler
+    public ResponseEntity<ApiExceptionDto> exceptionHandler(final DuplicatedMemberException e) {
+        ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .errorMessage("중복된 사용자가 있습니다.")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(apiExceptionDto);
+    }
+
 }
