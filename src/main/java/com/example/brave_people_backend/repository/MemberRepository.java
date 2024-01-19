@@ -23,4 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("select m from Member m where m.memberId = :memberId")
     Member findByIdOne(Long memberId);
 
+    // 같은 이메일 있는지 검색
+    boolean existsByEmail(String email);
 }

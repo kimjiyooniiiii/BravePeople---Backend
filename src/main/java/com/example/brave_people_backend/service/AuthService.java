@@ -7,14 +7,14 @@ import com.example.brave_people_backend.jwt.TokenProvider;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +25,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+//    private final JavaMailSender javaMailSender;
 
     // 회원가입 service
     @Transactional
@@ -95,4 +96,45 @@ public class AuthService {
     public UsernameResponseDto findByEmail(String email) {
         return UsernameResponseDto.of(memberRepository.findByEmail(email));
     }
+
+    public void confirmEmail(String email) {
+        // 이메일 중복체크 먼저
+        if (memberRepository.existsByEmail(email)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 중복");
+        }
+
+
+    }
+
+//    public void sendMail(Member member) throws MessagingException {
+//        String fromMail = "knu.rideshare@gmail.com"; //email-config에 설정한 자신의 이메일 주소(보내는 사람)
+//        String toMail = member.getEmail(); //받는 사람
+//        String title = "RideShare 회원가입 인증 링크"; //제목
+//        String authLink = "http://localhost:8080/members/auth?id=" + member.getMemberId() + "&authCode=" + member.();
+//        String text =
+//                "<!DOCTYPE html>\n" +
+//                        "<html>\n" +
+//                        "<body>\n" +
+//                        "<div style=\"margin:100px;\">\n" +
+//                        "    <h1> 안녕하세요.</h1>\n" +
+//                        "    <h1> 택시팟/카풀 매칭 서비스 RideShare 입니다.</h1>\n" +
+//                        "    <br>\n" +
+//                        "        <p> 아래 링크를 클릭해 회원가입을 완료해 주세요.</p>\n" +
+//                        "    <br>\n" +
+//                        "    <div align=\"center\" style=\"border:1px solid black; font-family:verdana;\">\n" +
+//                        "    <h3> " + "<a href=\"" + authLink + "\">" + authLink + "</h3>\n" +
+//                        "    </div>\n" +
+//                        "    <br/>\n" +
+//                        "</div>\n" +
+//                        "</body>\n" +
+//                        "</html>";
+//
+//        MimeMessage message = javaMailSender.createMimeMessage();
+//        message.setFrom(fromMail); //보내는 이메일
+//        message.addRecipients(MimeMessage.RecipientType.TO, toMail); //보낼 이메일 설정
+//        message.setSubject(title); //제목 설정
+//        message.setText(text, "utf-8", "html");
+//
+//        javaMailSender.send(message);
+//    }
 }

@@ -38,4 +38,10 @@ public class AuthController {
     public ResponseEntity<UsernameResponseDto> email(@RequestParam("email") String email) {
         return ResponseEntity.ok(authService.findByEmail(email));
     }
+    
+    //이메일 중복확인 및 인증
+    @GetMapping("/email")
+    public void confirmEmail(@RequestParam("email") String email) {
+        authService.confirmEmail(email);
+    }
 }
