@@ -2,12 +2,15 @@ package com.example.brave_people_backend.service;
 
 import com.example.brave_people_backend.dto.LocationRequestDto;
 import com.example.brave_people_backend.dto.LocationResponseDto;
+import com.example.brave_people_backend.dto.ProfileResponseDto;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 
@@ -28,4 +31,9 @@ public class MemberService {
         return LocationResponseDto.of(findMember);
     }
 
+    public ProfileResponseDto getProfileInfo(Long memberId) {
+        return ProfileResponseDto.of(memberRepository.findById(memberId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 멤버ID"))
+        );
+    }
 }
