@@ -30,7 +30,7 @@ public class SignupRequestDto {
     @NotBlank @Size(max = 30) @Email
     private String email;
 
-    @NotBlank @Size(max = 15)
+    @NotBlank @Size(max = 6)
     private String nickname;
 
     @NotBlank

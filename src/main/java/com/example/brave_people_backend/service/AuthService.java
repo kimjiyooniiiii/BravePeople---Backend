@@ -33,7 +33,7 @@ public class AuthService {
 
     // 회원가입 service
     @Transactional
-    public SignupResponseDto signup(SignupRequestDto signupRequestDto){
+    public void signup(SignupRequestDto signupRequestDto){
 
         String username = signupRequestDto.getUsername();
         String nickname = signupRequestDto.getNickname();
@@ -44,7 +44,7 @@ public class AuthService {
         }
 
         // 중복된 Member가 없을 경우, DB 저장
-        return SignupResponseDto.of(memberRepository.save(signupRequestDto.toMember(passwordEncoder)));
+        memberRepository.save(signupRequestDto.toMember(passwordEncoder));
     }
 
     // 로그인 service

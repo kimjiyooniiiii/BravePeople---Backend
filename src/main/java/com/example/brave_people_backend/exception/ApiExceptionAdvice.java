@@ -1,6 +1,7 @@
 package com.example.brave_people_backend.exception;
 
 import com.example.brave_people_backend.dto.ApiExceptionDto;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -46,6 +47,18 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(apiExceptionDto);
+    }
+
+    // JWT 토큰 예외
+    @ExceptionHandler
+    public ResponseEntity<ApiExceptionDto> exceptionHandler(final JwtException e) {
+        ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
+                .status(HttpStatus.UNAUTHORIZED.toString())
+                .errorMessage("Token을 확인해주세요.")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(apiExceptionDto);
     }
 
