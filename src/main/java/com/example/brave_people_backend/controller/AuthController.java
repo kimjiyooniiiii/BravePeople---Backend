@@ -18,8 +18,8 @@ public class AuthController {
     // 회원가입 controller
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/signup")
-    public SignupResponseDto signup(@RequestBody @Valid SignupRequestDto signupRequestDto){
-        return authService.signup(signupRequestDto);
+    public void signup(@RequestBody @Valid SignupRequestDto signupRequestDto){
+        authService.signup(signupRequestDto);
     }
 
     // 로그인 controller

@@ -10,8 +10,6 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
-import java.math.BigDecimal;
-
 @Entity
 @Getter
 @Builder
@@ -31,7 +29,7 @@ public class Member {
     @Column(length = 30, unique = true, updatable = false)
     private String email;
 
-    @Column(length = 15, unique = true)
+    @Column(length = 6, unique = true)
     private String nickname;
 
     @Column(columnDefinition = "TINYINT(1)", nullable = false)

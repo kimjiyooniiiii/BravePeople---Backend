@@ -3,6 +3,7 @@ package com.example.brave_people_backend.service;
 import com.example.brave_people_backend.dto.*;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.RefreshToken;
+import com.example.brave_people_backend.exception.DuplicatedMemberException;
 import com.example.brave_people_backend.jwt.TokenProvider;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.repository.RefreshTokenRepository;
@@ -19,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -34,13 +33,18 @@ public class AuthService {
 
     // 회원가입 service
     @Transactional
-    public SignupResponseDto signup(SignupRequestDto signupRequestDto){
-        if(memberRepository.existsByUsername(signupRequestDto.getUsername())){
-            throw new RuntimeException("이미 가입되어 있는 아이디 입니다.");
+    public void signup(SignupRequestDto signupRequestDto){
+
+        String username = signupRequestDto.getUsername();
+        String nickname = signupRequestDto.getNickname();
+
+        // 중복된 아이디, 닉네임이 있을 경우 예외 발생
+        if(!memberRepository.findByUsernameOrNickname(username, nickname).isEmpty()) {
+            throw new DuplicatedMemberException();
         }
 
-        Member member = signupRequestDto.toMember(passwordEncoder);
-        return SignupResponseDto.of(memberRepository.save(member));
+        // 중복된 Member가 없을 경우, DB 저장
+        memberRepository.save(signupRequestDto.toMember(passwordEncoder));
     }
 
     // 로그인 service
@@ -63,13 +67,14 @@ public class AuthService {
 
         // refresh token -> db 저장
         refreshTokenRepository.save(refreshToken);
-        Optional<Member> member = memberRepository.findById(Long.parseLong(authenticate.getName()));
+        Member member = memberRepository.findById(Long.parseLong(authenticate.getName()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."));
 
         LoginResponseDto loginResponseDto = LoginResponseDto.builder()
                 .memberId(authenticate.getName())
-                .nickname(member.get().getNickname())
-                .lat(String.valueOf(member.get().getLat()))
-                .lng(String.valueOf(member.get().getLng()))
+                .nickname(member.getNickname())
+                .lat(String.valueOf(member.getLat()))
+                .lng(String.valueOf(member.getLng()))
                 .tokenDto(tokenDto)
                 .build();
 
@@ -87,7 +92,7 @@ public class AuthService {
             throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
         }
 
-        // refreshTokenRepository에 정보가 없으면 로그아웃 됨 -> 다시 로그인 해야함
+        // 사용자가 직접 로그아웃을 했을 경우
         RefreshToken refreshToken = refreshTokenRepository.findLatestRefreshToken(memberId)
                 .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
 
@@ -120,8 +125,6 @@ public class AuthService {
         if (memberRepository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 중복");
         }
-
-
     }
 
     public void sendMail(String email) throws MessagingException {

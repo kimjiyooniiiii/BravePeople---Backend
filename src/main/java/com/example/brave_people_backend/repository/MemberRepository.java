@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,4 +23,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 같은 이메일 있는지 검색
     boolean existsByEmail(String email);
+
+    // 회원가입 - 아이디 또는 닉네임 중복체크
+    List<Member> findByUsernameOrNickname(String username, String nickname);
 }

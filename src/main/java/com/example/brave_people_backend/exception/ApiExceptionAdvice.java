@@ -1,6 +1,7 @@
 package com.example.brave_people_backend.exception;
 
 import com.example.brave_people_backend.dto.ApiExceptionDto;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,6 +32,30 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
         ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
                 .status(HttpStatus.UNAUTHORIZED.toString())
                 .errorMessage("로그인 후 이용해주세요.")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(apiExceptionDto);
+    }
+
+    // 회원가입 시, 중복된 아이디, 닉네임이 있을 경우
+    @ExceptionHandler
+    public ResponseEntity<ApiExceptionDto> exceptionHandler(final DuplicatedMemberException e) {
+        ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .errorMessage("중복된 사용자가 있습니다.")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(apiExceptionDto);
+    }
+
+    // JWT 토큰 예외
+    @ExceptionHandler
+    public ResponseEntity<ApiExceptionDto> exceptionHandler(final JwtException e) {
+        ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
+                .status(HttpStatus.UNAUTHORIZED.toString())
+                .errorMessage("Token을 확인해주세요.")
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
