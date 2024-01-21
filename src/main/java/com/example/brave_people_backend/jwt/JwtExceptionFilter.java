@@ -33,9 +33,8 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         final Map<String, Object> body = new HashMap<>();
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("error", "Unauthorized");
-        // ex.getMessage() 에는 jwtException을 발생시키면서 입력한 메세지가 들어있다.
         body.put("message", e.getMessage());
-        body.put("path", request.getServletPath());
+
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), body);
         response.setStatus(HttpServletResponse.SC_OK);

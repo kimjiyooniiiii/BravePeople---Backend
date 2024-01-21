@@ -99,11 +99,11 @@ public class AuthService {
         }
 
         // 사용자가 직접 로그아웃을 했을 경우
-        RefreshToken refreshToken = refreshTokenRepository.findLatestRefreshToken(memberId)
+        RefreshToken refreshToken = refreshTokenRepository.findRefreshToken(memberId)
                 .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
 
         // redis에 저장된 refreshToken과 사용자가 입력한 refreshToken 비교
-        if(!refreshToken.getRefreshToken().equals(tokenRequestDto.getRefreshToken())) {
+        if(!refreshToken.getTokenNumber().equals(tokenRequestDto.getRefreshToken())) {
             throw new RuntimeException("Refresh Token의 정보가 일치하지 않습니다.");
         }
 

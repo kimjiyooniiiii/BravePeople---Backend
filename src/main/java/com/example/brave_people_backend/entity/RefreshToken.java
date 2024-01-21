@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -21,7 +20,7 @@ public class RefreshToken {
     private String memberId;     // memberId를 String으로 저장
 
     @Column(length = 512)
-    private String refreshToken;      // refresh token
+    private String tokenNumber;      // refresh token
 
     @UpdateTimestamp
     private LocalDateTime updateAt = LocalDateTime.now();
@@ -29,12 +28,12 @@ public class RefreshToken {
     @Builder
     public RefreshToken(String memberId, String refreshToken) {
         this.memberId = memberId;
-        this.refreshToken = refreshToken;
+        this.tokenNumber = refreshToken;
     }
 
     public RefreshToken updateValue(String refreshToken) {
         this.updateAt = LocalDateTime.now();
-        this.refreshToken = refreshToken;
+        this.tokenNumber = refreshToken;
         return this;
     }
 }
