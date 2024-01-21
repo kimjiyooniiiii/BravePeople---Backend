@@ -14,7 +14,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 가입 아이디로 사용자 검색
     Optional<Member> findByUsername(String username);
 
-    // 같은 아이디 있는지 검색
+    // 아이디 중복 체크
     boolean existsByUsername(String username);
 
     // 이메일로 사용자 검색
@@ -23,7 +23,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 같은 이메일 있는지 검색
     boolean existsByEmail(String email);
 
-    // 회원가입 - 아이디 또는 닉네임 중복체크
-    List<Member> findByUsernameOrNickname(String username, String nickname);
+    //닉네임 중복 체크
+    boolean existsByNickname(String nickname);
 
 }
