@@ -1,14 +1,18 @@
 package com.example.brave_people_backend.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtExceptionFilter extends OncePerRequestFilter {
@@ -23,7 +27,17 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     }
 
     // Client로 JWT 토큰에 관한 Error Message 전송
-    private void sendJwtErrorResponse(HttpServletRequest request, HttpServletResponse response, Throwable e) {
-        throw new JwtException("토큰 만료");
+    private void sendJwtErrorResponse(HttpServletRequest request, HttpServletResponse response, Throwable e) throws IOException {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        final Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+        body.put("error", "Unauthorized");
+        // ex.getMessage() 에는 jwtException을 발생시키면서 입력한 메세지가 들어있다.
+        body.put("message", e.getMessage());
+        body.put("path", request.getServletPath());
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(response.getOutputStream(), body);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }
