@@ -35,6 +35,7 @@ public class MemberController {
     //닉네임, 자기소개 수정
     @PatchMapping("/profile")
     public UpdateProfileInfoResponseDto updateProfileInfo(@RequestBody UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {
+        System.out.println("updateProfileInfoRequestDto = " + updateProfileInfoRequestDto);
         return memberService.updateProfileInfo(updateProfileInfoRequestDto);
     }
 }
