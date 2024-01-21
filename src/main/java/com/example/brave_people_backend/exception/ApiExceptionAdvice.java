@@ -24,14 +24,14 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     // 비회원 접근 시
-//    @ExceptionHandler(InsufficientAuthenticationException.class)
-//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//    public ApiExceptionDto exceptionHandler(final InsufficientAuthenticationException e) {
-//        return ApiExceptionDto.builder()
-//                .status(HttpStatus.UNAUTHORIZED.toString())
-//                .errorMessage("로그인 후 이용해주세요.")
-//                .build();
-//    }
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiExceptionDto exceptionHandler(final InsufficientAuthenticationException e) {
+        return ApiExceptionDto.builder()
+                .status(HttpStatus.UNAUTHORIZED.toString())
+                .errorMessage("로그인 후 이용해주세요.")
+                .build();
+    }
 
     // 회원가입 시, 중복된 아이디, 닉네임이 있을 경우
     @ExceptionHandler(CustomException.class)
