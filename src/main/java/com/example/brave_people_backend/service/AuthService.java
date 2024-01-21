@@ -56,6 +56,10 @@ public class AuthService {
         //authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
         Authentication authenticate = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
+        /*// 이미 DB에 refresh token이 있다면
+        if(refreshTokenRepository.findRefreshToken(authenticate.getName()).isPresent()) {
+
+        }*/
         // Access Token, Refresh Token 생성
         TokenDto tokenDto = tokenProvider.generateTokenDto(authenticate);
 

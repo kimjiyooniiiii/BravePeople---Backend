@@ -7,6 +7,9 @@ import com.example.brave_people_backend.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,5 +27,11 @@ public class MemberController {
     @GetMapping("/profile")
     public ProfileResponseDto getProfileInfo(@RequestParam("memberid") Long memberId) {
         return memberService.getProfileInfo(memberId);
+    }
+
+    // 프로필 이미지 변경
+    @PatchMapping("/profile/image")
+    public ResponseEntity<String> updateProfileImage(@RequestPart("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(memberService.updateProfileImage(file));
     }
 }
