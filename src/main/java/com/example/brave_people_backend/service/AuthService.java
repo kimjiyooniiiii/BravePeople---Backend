@@ -60,8 +60,11 @@ public class AuthService {
             throw new CustomException("이메일 미인증");
         }
 
-        // 중복된 Member가 없을 경우, DB 저장
-        memberRepository.save(signupRequestDto.toMember(passwordEncoder));
+        // 4. 중복된 Member가 없을 경우, DB 저장
+        Member savedMember = memberRepository.save(signupRequestDto.toMember(passwordEncoder));
+
+        // 5. 가입이 완료되었으므로 EMAIL 테이블에서 똑같은 EMAIL 모두 삭제
+        emailRepository.deleteByEmailAddress(savedMember.getEmail());
     }
 
     // 로그인 service
