@@ -1,10 +1,12 @@
 package com.example.brave_people_backend.service;
 
 import com.example.brave_people_backend.dto.*;
+import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.RefreshToken;
 import com.example.brave_people_backend.exception.DuplicatedMemberException;
 import com.example.brave_people_backend.jwt.TokenProvider;
+import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.repository.RefreshTokenRepository;
 import jakarta.mail.MessagingException;
@@ -20,12 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+import java.util.Random;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final MemberRepository memberRepository;
+    private final EmailRepository emailRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -120,18 +126,46 @@ public class AuthService {
     }
 
     @Transactional
-    public void confirmEmail(String email) {
-        // 이메일 중복체크 먼저
+    public Long emailCheckAndSendMail(String email) {
+        // 1. MEMBER 테이블에서 이메일 중복체크 먼저
         if (memberRepository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 중복");
         }
+
+        // 2. EMAIL 테이블에서 status = true인 레코드가 있는지 확인
+        // status = true인 레코드가 있을 경우 중복이므로 400 에러 반환
+        if (emailRepository.findByEmailAddress(email).stream().anyMatch(Email::isAuthStatus)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 가입 진행 중인 이메일");
+        }
+
+        // 3. Email Entity 생성 및 테이블에 저장
+        Email emailEntity = Email.builder()
+                .emailAddress(email)
+                .authCode(generateAuthCode())
+                .authStatus(false)
+                .build();
+
+        emailRepository.save(emailEntity);
+
+        System.out.println("emailEntity = " + emailEntity);
+
+        // 이메일 전송 및 전송 실패시 예외 처리
+        try {
+            sendMail(emailEntity);
+            return emailEntity.getEmailId();
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 전송 오류");
+        }
+
     }
 
-    public void sendMail(String email) throws MessagingException {
+    public void sendMail(Email emailEntity) throws MessagingException {
         String fromMail = "brave.knu@gmail.com"; //email-config에 설정한 자신의 이메일 주소(보내는 사람)
-        String toMail = email; //받는 사람
+        String toMail = "rktlrhrl531@naver.com"; //emailEntity.getEmailAddress(); //받는 사람
         String title = "[용감한원정대] 회원가입 인증 링크"; //제목
-        String authLink = "http://13.209.77.50:8080/auth/mailcode?id=";// + email + "&authCode=" + member.();
+        String authLink =
+                "http://localhost:8080/auth/code-confirm?id=" + emailEntity.getEmailId()
+                        + "&code=" + emailEntity.getAuthCode();
         String text =
                 "<!DOCTYPE html>\n" +
                         "<html>\n" +
@@ -159,8 +193,24 @@ public class AuthService {
         javaMailSender.send(message);
     }
 
-    //테이블의 authCode와 getParameter로 넘어온 authCode를 비교하고 동일하면 update authStatus=true 변경
-    public String authMailCode(int emailId, int authCode) {
-        return null;
+    public int generateAuthCode() {
+        return new Random().nextInt(888888) + 111111;
+    }
+
+    //테이블의 authCode와 getParameter로 넘어온 authCode를 비교하고 동일하면 authStatus=true 변경
+    @Transactional
+    public String codeConfirm(Long emailId, int authCode) {
+        Optional<Email> emailEntity = emailRepository.findById(emailId); //테이블의 emailEntity
+
+        if (emailEntity.isEmpty()) {
+            return "유효하지 않은 이메일 주소입니다. URL 주소를 확인하여 주세요.";
+        }
+
+        if (emailEntity.get().getAuthCode() == authCode) {
+            emailEntity.get().onAuthStatus(); // authCode가 일치하면 authStatus = true 변경
+            return "이메일 인증을 완료했습니다. 홈페이지로 이동해 로그인하여 주시기 바랍니다.";
+        } else {
+            return "유효하지 않은 인증코드입니다. URL 주소를 확인하여 주세요.";
+        }
     }
 }

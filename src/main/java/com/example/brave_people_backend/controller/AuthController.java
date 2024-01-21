@@ -40,16 +40,21 @@ public class AuthController {
         return ResponseEntity.ok(authService.findByEmail(email));
     }
     
-    //이메일 중복확인 및 인증
-    @GetMapping("/email")
-    public void confirmEmail(@RequestParam("email") String email) {
-        authService.confirmEmail(email);
+    //이메일 중복확인 및 메일 전송
+    @GetMapping(value = "/email", produces = "application/json")
+    public String emailCheckAndSendMail(@RequestParam("address") String emailAddress) {
+        Long emailId = authService.emailCheckAndSendMail(emailAddress);
+
+        return "{\"emailId\": " + emailId + "}";
     }
 
     //이메일 인증 링크 클릭시 프론트에 링크 전송 후 받는 컨트롤러 메서드
-    @GetMapping("/mailcode")
-    public String authMailCode(@RequestParam("email") int emailId, @RequestParam("code") int authCode) {
-        return authService.authMailCode(emailId, authCode);
+    @GetMapping("/code-confirm")
+    public String codeConfirm(@RequestParam("id") Long emailId, @RequestParam("code") int authCode) {
+        return authService.codeConfirm(emailId, authCode);
     }
+
+    // TODO signup 시 email_id 및 emailAddress를 통해 EMAIL 테이블의 authStatus = true 인지 확인로직 추가
+    // TODO signup 완료 후 이메일 테이블 내용 삭제해야함
 
 }
