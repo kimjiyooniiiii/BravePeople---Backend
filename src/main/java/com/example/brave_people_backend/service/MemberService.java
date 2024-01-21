@@ -10,6 +10,7 @@ import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -27,6 +28,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final AmazonS3 amazonS3;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -119,5 +122,19 @@ public class MemberService {
         }
 
         return UpdateProfileInfoResponseDto.of(findMember);
+    }
+
+    //비밀번호 인증
+    @Transactional
+    public void reconfirmPassword(PWReconfirmRequestDto pwReconfirmRequestDto) {
+
+        //토큰으로 현재 회원 검색, 없으면 예외처리
+        Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."));
+
+        //passwordEncoder로 현재 입력한 비밀번호와 DB에 있는 비밀번호가 같은지 검사
+        if (!passwordEncoder.matches(pwReconfirmRequestDto.getNowPassword(), findMember.getPw())) {
+            throw new CustomException("잘못된 비밀번호 입니다.");
+        }
     }
 }

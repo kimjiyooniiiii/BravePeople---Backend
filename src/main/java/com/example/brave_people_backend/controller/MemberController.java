@@ -3,6 +3,7 @@ package com.example.brave_people_backend.controller;
 import com.example.brave_people_backend.dto.*;
 import com.example.brave_people_backend.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,5 +39,12 @@ public class MemberController {
     @PatchMapping("/profile")
     public UpdateProfileInfoResponseDto updateProfileInfo(@RequestBody UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {
         return memberService.updateProfileInfo(updateProfileInfoRequestDto);
+    }
+
+    //비밀번호 인증
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/pw")
+    public void reconfirmPassword(@RequestBody PWReconfirmRequestDto pwReconfirmRequestDto){
+        memberService.reconfirmPassword(pwReconfirmRequestDto);
     }
 }
