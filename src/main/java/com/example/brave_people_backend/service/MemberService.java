@@ -47,7 +47,7 @@ public class MemberService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."));
 
         //넘어온 닉네임이 null인지 체크
-        if (!updateProfileInfoRequestDto.getNickname().isEmpty()) {
+        if (updateProfileInfoRequestDto.getNickname() != null) {
             //닉네임 중복 체크
             if (memberRepository.existsByNickname(updateProfileInfoRequestDto.getNickname())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "닉네임 중복 오류");
@@ -56,7 +56,7 @@ public class MemberService {
             findMember.changeNickname(updateProfileInfoRequestDto.getNickname());
         }
         //넘어온 자기소개가 null이 아니면
-        if (!updateProfileInfoRequestDto.getIntroduction().isEmpty()) {
+        if (updateProfileInfoRequestDto.getIntroduction() != null) {
             //자기소개 변경
             findMember.changeIntroduction(updateProfileInfoRequestDto.getIntroduction());
         }
