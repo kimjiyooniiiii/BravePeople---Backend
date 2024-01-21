@@ -164,7 +164,7 @@ public class AuthService {
         String toMail = emailEntity.getEmailAddress(); //받는 사람
         String title = "[용감한원정대] 회원가입 인증 링크"; //제목
         String authLink =
-                "http://localhost:8080/auth/code-confirm?id=" + emailEntity.getEmailId()
+                "http://13.209.77.50:8080/auth/code-confirm?id=" + emailEntity.getEmailId()
                         + "&code=" + emailEntity.getAuthCode();
         String text =
                 "<!DOCTYPE html>\n" +
