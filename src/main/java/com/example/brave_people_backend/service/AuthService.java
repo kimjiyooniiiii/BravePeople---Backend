@@ -161,7 +161,7 @@ public class AuthService {
 
     public void sendMail(Email emailEntity) throws MessagingException {
         String fromMail = "brave.knu@gmail.com"; //email-config에 설정한 자신의 이메일 주소(보내는 사람)
-        String toMail = "rktlrhrl531@naver.com"; //emailEntity.getEmailAddress(); //받는 사람
+        String toMail = emailEntity.getEmailAddress(); //받는 사람
         String title = "[용감한원정대] 회원가입 인증 링크"; //제목
         String authLink =
                 "http://localhost:8080/auth/code-confirm?id=" + emailEntity.getEmailId()
