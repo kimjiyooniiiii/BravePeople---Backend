@@ -5,6 +5,7 @@ import com.example.brave_people_backend.dto.PostListVo;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
 import com.example.brave_people_backend.enumclass.Act;
+import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.BoardRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
@@ -12,10 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 
@@ -45,7 +44,7 @@ public class BoardService {
         else {
             //currentMemberId로 현재 로그인 한 Member 엔티티를 반환
             Member findMember = memberRepository.findById(currentMemberId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
 
             //Member 엔티티에서 위도 경도 데이터 반환
             BigDecimal lat = findMember.getLat();

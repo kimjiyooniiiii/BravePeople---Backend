@@ -4,7 +4,7 @@ import com.example.brave_people_backend.dto.*;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.RefreshToken;
-import com.example.brave_people_backend.exception.DuplicatedMemberException;
+import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.jwt.TokenProvider;
 import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
@@ -12,7 +12,6 @@ import com.example.brave_people_backend.repository.RefreshTokenRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -20,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.Random;
@@ -46,7 +44,18 @@ public class AuthService {
 
         // 중복된 아이디, 닉네임이 있을 경우 예외 발생
         if(!memberRepository.findByUsernameOrNickname(username, nickname).isEmpty()) {
-            throw new DuplicatedMemberException();
+            throw new CustomException();
+        }
+
+        // 이메일 미인증시 예외 발생
+        Long emailId = signupRequestDto.getEmailId();
+        if (emailId == null) {
+            throw new CustomException("이메일 미인증");
+        }
+        Email emailEntity = emailRepository.findById(emailId).orElseThrow(
+                () -> new CustomException("이메일 미인증"));
+        if (!emailEntity.isAuthStatus()) {
+            throw new CustomException("이메일 미인증");
         }
 
         // 중복된 Member가 없을 경우, DB 저장
@@ -74,17 +83,15 @@ public class AuthService {
         // refresh token -> db 저장
         refreshTokenRepository.save(refreshToken);
         Member member = memberRepository.findById(Long.parseLong(authenticate.getName()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
 
-        LoginResponseDto loginResponseDto = LoginResponseDto.builder()
+        return LoginResponseDto.builder()
                 .memberId(authenticate.getName())
                 .nickname(member.getNickname())
                 .lat(String.valueOf(member.getLat()))
                 .lng(String.valueOf(member.getLng()))
                 .tokenDto(tokenDto)
                 .build();
-
-        return loginResponseDto;
     }
 
     // refresh token으로 access token 재발급 받기
@@ -121,7 +128,7 @@ public class AuthService {
     @Transactional
     public UsernameResponseDto findByEmail(String email) {
         Member findMember = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "존재하지 않는 이메일"));
+                .orElseThrow(() -> new CustomException("존재하지 않는 이메일"));
         return UsernameResponseDto.of((findMember.getUsername()).
                 substring(0, (findMember.getUsername()).length()-3) + "***");
     }
@@ -130,13 +137,13 @@ public class AuthService {
     public Long emailCheckAndSendMail(String email) {
         // 1. MEMBER 테이블에서 이메일 중복체크 먼저
         if (memberRepository.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 중복");
+            throw new CustomException("이메일 중복");
         }
 
         // 2. EMAIL 테이블에서 status = true인 레코드가 있는지 확인
         // status = true인 레코드가 있을 경우 중복이므로 400 에러 반환
         if (emailRepository.findByEmailAddress(email).stream().anyMatch(Email::isAuthStatus)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 가입 진행 중인 이메일");
+            throw new CustomException("이미 가입 진행 중인 이메일");
         }
 
         // 3. Email Entity 생성 및 테이블에 저장
@@ -155,7 +162,7 @@ public class AuthService {
             sendMail(emailEntity);
             return emailEntity.getEmailId();
         } catch (MessagingException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 전송 오류");
+            throw new CustomException("이메일 전송 오류");
         }
 
     }

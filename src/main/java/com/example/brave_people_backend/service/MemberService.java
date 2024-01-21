@@ -2,6 +2,7 @@ package com.example.brave_people_backend.service;
 
 import com.example.brave_people_backend.dto.*;
 import com.example.brave_people_backend.entity.Member;
+import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class MemberService {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("회원을 찾을 수 없습니다."));
 
         //위도, 경도 변경
         findMember.changeLatAndLng(new BigDecimal(locationRequestDto.getLat()), new BigDecimal(locationRequestDto.getLng()));
@@ -34,7 +35,7 @@ public class MemberService {
 
     public ProfileResponseDto getProfileInfo(Long memberId) {
         return ProfileResponseDto.of(memberRepository.findById(memberId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유효하지 않은 멤버ID"))
+                () -> new CustomException("유효하지 않은 멤버ID"))
         );
     }
 

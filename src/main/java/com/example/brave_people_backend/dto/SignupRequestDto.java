@@ -39,6 +39,9 @@ public class SignupRequestDto {
     @NotBlank
     private String lng;
 
+    @NotNull
+    private Long emailId;
+
     public Member toMember(PasswordEncoder passwordEncoder) {
         return Member.builder()
                 .username(username)
