@@ -39,15 +39,17 @@ public class AuthService {
     @Transactional
     public void signup(SignupRequestDto signupRequestDto){
 
-        String username = signupRequestDto.getUsername();
-        String nickname = signupRequestDto.getNickname();
-
-        // 중복된 아이디, 닉네임이 있을 경우 예외 발생
-        if(!memberRepository.findByUsernameOrNickname(username, nickname).isEmpty()) {
-            throw new CustomException();
+        // 1. 아이디 중복체크
+        if (memberRepository.existsByUsername(signupRequestDto.getUsername())) {
+            throw new CustomException("아이디 중복");
         }
 
-        // 이메일 미인증시 예외 발생
+        // 2. 닉네임 중복체크
+        if (memberRepository.existsByNickname(signupRequestDto.getNickname())) {
+            throw new CustomException("닉네임 중복");
+        }
+
+        // 3. 이메일 미인증시 예외 발생
         Long emailId = signupRequestDto.getEmailId();
         if (emailId == null) {
             throw new CustomException("이메일 미인증");
