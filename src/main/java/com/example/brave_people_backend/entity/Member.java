@@ -71,4 +71,7 @@ public class Member {
     public void changeIntroduction(String introduction) {
         this.introduction = introduction;
     }
+
+    // 프로필 이미지 setter
+    public void changeProfileImage(String profile_img) { this.profile_img = profile_img; }
 }

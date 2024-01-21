@@ -22,6 +22,7 @@ public class MemberController {
         return ResponseEntity.ok(memberService.updateLocation(locationRequestDto));
     }
 
+    // 프로필 페이지
     @GetMapping("/profile")
     public ProfileResponseDto getProfileInfo(@RequestParam("memberid") Long memberId) {
         return memberService.getProfileInfo(memberId);
@@ -29,9 +30,10 @@ public class MemberController {
 
     // 프로필 이미지 변경
     @PatchMapping("/profile/image")
-    public ResponseEntity<String> updateProfileImage(@RequestPart("file") MultipartFile file) throws IOException {
+    public ResponseEntity<ProfileImageResponseDto> updateProfileImage(@RequestPart("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(memberService.updateProfileImage(file));
     }
+
     //닉네임, 자기소개 수정
     @PatchMapping("/profile")
     public UpdateProfileInfoResponseDto updateProfileInfo(@RequestBody UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {

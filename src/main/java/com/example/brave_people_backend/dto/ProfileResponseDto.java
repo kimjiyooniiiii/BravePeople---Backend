@@ -30,7 +30,7 @@ public class ProfileResponseDto {
                 .introduction(member.getIntroduction())
                 .score(3.5)
                 .medalCount(28)
-                .profileImage("https://images.ctfassets.net/h6goo9gw1hh6/2sNZtFAWOdP1lmQ33VwRN3/24e953b920a9cd0ff2e1d587742a2472/1-intro-photo-final.jpg")
+                .profileImage(member.getProfile_img())
                 .memberId(member.getMemberId())
                 .build();
     }
