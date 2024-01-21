@@ -114,7 +114,9 @@ public class AuthService {
     // 이메일로 Member 찾기
     @Transactional
     public UsernameResponseDto findByEmail(String email) {
-        return UsernameResponseDto.of(memberRepository.findByEmail(email));
+        Member findMember = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "존재하지 않는 이메일"));
+        return UsernameResponseDto.of(findMember);
     }
 
     @Transactional

@@ -56,6 +56,7 @@ public class Member {
     @Column(length = 5, updatable = false)
     private String name;
 
+    //위도, 경도 변환 setter
     public void changeLatAndLng(BigDecimal lat, BigDecimal lng) {
         this.lat = lat;
         this.lng = lng;

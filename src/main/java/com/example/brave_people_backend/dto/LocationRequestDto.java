@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class LocationRequestDto {
 
+    //request body에서 위도, 경도 정보를 String으로 받음
     private String lat;
     private String lng;
 
