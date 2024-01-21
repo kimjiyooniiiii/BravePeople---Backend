@@ -26,4 +26,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 회원가입 - 아이디 또는 닉네임 중복체크
     List<Member> findByUsernameOrNickname(String username, String nickname);
+
+    //닉네임 중복 체크
+    boolean existsByNickname(String nickname);
+
+
 }

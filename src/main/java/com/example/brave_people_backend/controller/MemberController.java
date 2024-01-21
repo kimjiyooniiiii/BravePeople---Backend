@@ -1,8 +1,6 @@
 package com.example.brave_people_backend.controller;
 
-import com.example.brave_people_backend.dto.LocationRequestDto;
-import com.example.brave_people_backend.dto.LocationResponseDto;
-import com.example.brave_people_backend.dto.ProfileResponseDto;
+import com.example.brave_people_backend.dto.*;
 import com.example.brave_people_backend.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,5 +22,11 @@ public class MemberController {
     @GetMapping("/profile")
     public ProfileResponseDto getProfileInfo(@RequestParam("memberid") Long memberId) {
         return memberService.getProfileInfo(memberId);
+    }
+
+    //닉네임, 자기소개 수정
+    @PatchMapping("/profile")
+    public UpdateProfileInfoResponseDto updateProfileInfo(@RequestBody UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {
+        return memberService.updateProfileInfo(updateProfileInfoRequestDto);
     }
 }
