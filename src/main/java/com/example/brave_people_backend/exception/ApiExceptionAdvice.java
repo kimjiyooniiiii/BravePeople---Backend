@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+// TODO 1) MethodArgumentNotValidException 2) BindException 예외처리 하기
 // 예외를 처리하는 class
 @RestControllerAdvice
 public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {

@@ -49,9 +49,9 @@ public class MemberController {
         memberService.reconfirmPassword(pwReconfirmRequestDto);
     }
 
-    //비밀번호 재설정-마이페이지
+    //비밀번호 재설정
     @PatchMapping("/pw")
-    public void updatePwFromMypage(@RequestBody @Valid UpdatePwRequestDto updatePwRequestDto) {
-        memberService.updatePwFromMypage(updatePwRequestDto);
+    public void updatePassword(@RequestBody @Valid UpdatePwRequestDto updatePwRequestDto) {
+        memberService.updatePassword(updatePwRequestDto);
     }
 }
