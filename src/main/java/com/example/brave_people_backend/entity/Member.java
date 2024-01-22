@@ -47,7 +47,7 @@ public class Member {
     private String introduction;
 
     @Column(length = 260)
-    private String profile_img;
+    private String profileImg;
 
     @Column(columnDefinition = "varchar(20)", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -73,5 +73,5 @@ public class Member {
     }
 
     // 프로필 이미지 setter
-    public void changeProfileImage(String profile_img) { this.profile_img = profile_img; }
+    public void changeProfileImage(String profileImg) { this.profileImg = profileImg; }
 }

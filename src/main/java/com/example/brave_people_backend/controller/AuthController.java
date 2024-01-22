@@ -54,7 +54,9 @@ public class AuthController {
         return authService.codeConfirm(emailId, authCode);
     }
 
-    // TODO signup 시 email_id 및 emailAddress를 통해 EMAIL 테이블의 authStatus = true 인지 확인로직 추가
-    // TODO signup 완료 후 이메일 테이블 내용 삭제해야함
-
+    //비밀번호 찾기
+    @GetMapping("/pw")
+    public void findPasswordAndSendMail(@RequestParam("username") String username, @RequestParam("email") String email) {
+        authService.findPasswordAndSendMail(username, email);
+    }
 }

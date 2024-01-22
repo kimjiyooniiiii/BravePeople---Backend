@@ -164,11 +164,9 @@ public class AuthService {
 
         emailRepository.save(emailEntity);
 
-        System.out.println("emailEntity = " + emailEntity);
-
         // 이메일 전송 및 전송 실패시 예외 처리
         try {
-            sendMail(emailEntity);
+            sendSignupMail(emailEntity);
             return emailEntity.getEmailId();
         } catch (MessagingException e) {
             throw new CustomException("이메일 전송 오류");
@@ -176,7 +174,46 @@ public class AuthService {
 
     }
 
-    public void sendMail(Email emailEntity) throws MessagingException {
+    //테이블의 authCode와 getParameter로 넘어온 authCode를 비교하고 동일하면 authStatus=true 변경
+    @Transactional
+    public String codeConfirm(Long emailId, int authCode) {
+        Optional<Email> emailEntity = emailRepository.findById(emailId); //테이블의 emailEntity
+
+        if (emailEntity.isEmpty()) {
+            return "유효하지 않은 이메일 주소입니다. URL 주소를 확인하여 주세요.";
+        }
+
+        if (emailEntity.get().getAuthCode() == authCode) {
+            emailEntity.get().onAuthStatus(); // authCode가 일치하면 authStatus = true 변경
+            return "이메일 인증을 완료했습니다. 홈페이지로 이동해 로그인하여 주시기 바랍니다.";
+        } else {
+            return "유효하지 않은 인증코드입니다. URL 주소를 확인하여 주세요.";
+        }
+    }
+
+    @Transactional
+    public void findPasswordAndSendMail(String username, String email) {
+        // 1. 아이디 체크
+        Member findMember = memberRepository.findByUsername(username).orElseThrow(() -> new CustomException("존재하지 않는 아이디"));
+        // 2. 이메일 체크
+        if (!findMember.getEmail().equals(email)) { throw new CustomException("존재하지 않는 이메일"); }
+        // 3. Email Entity 생성 및 테이블에 저장
+        Email emailEntity = Email.builder()
+                .emailAddress(email)
+                .authCode(generateAuthCode())
+                .authStatus(false)
+                .build();
+        emailRepository.save(emailEntity);
+        // 4. 재설정 링크(:3000) 전송
+        try {
+            sendFindPwMail(emailEntity, findMember.getMemberId());
+        } catch (MessagingException e) {
+            throw new CustomException("이메일 전송 오류");
+        }
+    }
+
+
+    public void sendSignupMail(Email emailEntity) throws MessagingException {
         String fromMail = "brave.knu@gmail.com"; //email-config에 설정한 자신의 이메일 주소(보내는 사람)
         String toMail = emailEntity.getEmailAddress(); //받는 사람
         String title = "[용감한원정대] 회원가입 인증 링크"; //제목
@@ -210,24 +247,41 @@ public class AuthService {
         javaMailSender.send(message);
     }
 
-    public int generateAuthCode() {
-        return new Random().nextInt(888888) + 111111;
+    public void sendFindPwMail(Email emailEntity, Long memeberId) throws MessagingException {
+        String fromMail = "brave.knu@gmail.com"; //email-config에 설정한 자신의 이메일 주소(보내는 사람)
+        String toMail = emailEntity.getEmailAddress(); //받는 사람
+        String title = "[용감한원정대] 비밀번호 찾기 링크"; //제목
+        String authLink =
+                "http://localhost:3000/resetpw?memberid=" + memeberId
+                        + "&code=" + emailEntity.getAuthCode();
+        String text =
+                "<!DOCTYPE html>\n" +
+                        "<html>\n" +
+                        "<body>\n" +
+                        "<div style=\"margin:100px;\">\n" +
+                        "    <h1> 안녕하세요.</h1>\n" +
+                        "    <h1> 용감한원정대 BravePeople 입니다.</h1>\n" +
+                        "    <br>\n" +
+                        "        <p> 아래 링크를 클릭해 비밀번호 찾기를 계속해 주세요.</p>\n" +
+                        "    <br>\n" +
+                        "    <div align=\"center\" style=\"border:1px solid black; font-family:verdana;\">\n" +
+                        "    <h3> " + "<a href=\"" + authLink + "\">" + authLink + "</h3>\n" +
+                        "    </div>\n" +
+                        "    <br/>\n" +
+                        "</div>\n" +
+                        "</body>\n" +
+                        "</html>";
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        message.setFrom(fromMail); //보내는 이메일
+        message.addRecipients(MimeMessage.RecipientType.TO, toMail); //보낼 이메일 설정
+        message.setSubject(title); //제목 설정
+        message.setText(text, "utf-8", "html");
+
+        javaMailSender.send(message);
     }
 
-    //테이블의 authCode와 getParameter로 넘어온 authCode를 비교하고 동일하면 authStatus=true 변경
-    @Transactional
-    public String codeConfirm(Long emailId, int authCode) {
-        Optional<Email> emailEntity = emailRepository.findById(emailId); //테이블의 emailEntity
-
-        if (emailEntity.isEmpty()) {
-            return "유효하지 않은 이메일 주소입니다. URL 주소를 확인하여 주세요.";
-        }
-
-        if (emailEntity.get().getAuthCode() == authCode) {
-            emailEntity.get().onAuthStatus(); // authCode가 일치하면 authStatus = true 변경
-            return "이메일 인증을 완료했습니다. 홈페이지로 이동해 로그인하여 주시기 바랍니다.";
-        } else {
-            return "유효하지 않은 인증코드입니다. URL 주소를 확인하여 주세요.";
-        }
+    public int generateAuthCode() {
+        return new Random().nextInt(888888) + 111111;
     }
 }

@@ -30,7 +30,7 @@ public class ProfileResponseDto {
                 .introduction(member.getIntroduction())
                 .score(3.5)
                 .medalCount(28)
-                .profileImage(member.getProfile_img())
+                .profileImage(member.getProfileImg())
                 .memberId(member.getMemberId())
                 .build();
     }
