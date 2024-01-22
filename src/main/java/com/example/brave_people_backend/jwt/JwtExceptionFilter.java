@@ -1,18 +1,18 @@
 package com.example.brave_people_backend.jwt;
 
+import com.example.brave_people_backend.dto.ApiExceptionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class JwtExceptionFilter extends OncePerRequestFilter {
@@ -29,14 +29,16 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     // Client로 JWT 토큰에 관한 Error Message 전송
     private void sendJwtErrorResponse(HttpServletRequest request, HttpServletResponse response, Throwable e) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("utf-8");
 
-        final Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        body.put("error", "Unauthorized");
-        body.put("message", "Access Token 만료");
+        ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
+                .status(HttpStatus.UNAUTHORIZED.toString())
+                .errorMessage("Access Token 만료")
+                .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = objectMapper.writeValueAsString(apiExceptionDto);
+        response.getWriter().write(result);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(response.getOutputStream(), body);
-        response.setStatus(HttpServletResponse.SC_OK);
     }
 }
