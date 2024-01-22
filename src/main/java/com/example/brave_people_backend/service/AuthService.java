@@ -99,6 +99,7 @@ public class AuthService {
                 .nickname(member.getNickname())
                 .lat(String.valueOf(member.getLat()))
                 .lng(String.valueOf(member.getLng()))
+                .profileImg(member.getProfileImg())
                 .tokenDto(tokenDto)
                 .build();
     }
