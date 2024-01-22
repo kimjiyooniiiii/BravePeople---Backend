@@ -20,6 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -139,13 +141,19 @@ public class MemberService {
     }
 
     //비밀번호 찾기 - 마이페이지
-
     @Transactional
     public void updatePwFromMypage(UpdatePwRequestDto updatePwRequestDto) {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."));
+
+        // 영문 + 숫자, 8자리 이상인지 확인
+        Pattern pattern = Pattern.compile("^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$");
+        Matcher matcher = pattern.matcher(updatePwRequestDto.getNewPassword());
+        if (!matcher.find() || updatePwRequestDto.getNewPassword() == null) {
+            throw new CustomException("비밀번호 구성 오류");
+        }
 
         //member의 pw를 인코딩한 후 저장
         findMember.changePw(passwordEncoder.encode(updatePwRequestDto.getNewPassword()));
