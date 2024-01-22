@@ -74,4 +74,9 @@ public class Member {
 
     // 프로필 이미지 setter
     public void changeProfileImage(String profileImg) { this.profileImg = profileImg; }
+
+    //비밀번호 setter
+    public void changePw(String pw) {
+        this.pw = pw;
+    }
 }

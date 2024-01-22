@@ -137,4 +137,17 @@ public class MemberService {
             throw new CustomException("잘못된 비밀번호 입니다.");
         }
     }
+
+    //비밀번호 찾기 - 마이페이지
+
+    @Transactional
+    public void updatePwFromMypage(UpdatePwRequestDto updatePwRequestDto) {
+
+        //토큰으로 현재 회원 검색, 없으면 예외처리
+        Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."));
+
+        //member의 pw를 인코딩한 후 저장
+        findMember.changePw(passwordEncoder.encode(updatePwRequestDto.getNewPassword()));
+    }
 }
