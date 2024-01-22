@@ -2,6 +2,7 @@ package com.example.brave_people_backend.exception;
 
 import com.example.brave_people_backend.dto.ApiExceptionDto;
 import org.springframework.http.HttpHeaders;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +29,6 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
                 .errorMessage("아이디, 비밀번호를 확인해주세요.")
                 .build();
     }
-
-/*    // 비회원 접근 시
-    @ExceptionHandler(InsufficientAuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ApiExceptionDto exceptionHandler(final InsufficientAuthenticationException e) {
-        return ApiExceptionDto.builder()
-                .status(HttpStatus.UNAUTHORIZED.toString())
-                .errorMessage("로그인 후 이용해주세요.")
-                .build();
-    }*/
 
     // CustomExceptionHandler
     @ExceptionHandler(CustomException.class)
@@ -68,5 +59,15 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(apiExceptionDto, HttpStatus.BAD_REQUEST);
+    }
+
+    // Refresh Token 만료
+    @ExceptionHandler(JwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiExceptionDto exceptionHandler(final JwtException e) {
+        return ApiExceptionDto.builder()
+                .status(HttpStatus.UNAUTHORIZED.toString())
+                .errorMessage("Refresh Token 만료")
+                .build();
     }
 }

@@ -3,16 +3,16 @@ package com.example.brave_people_backend.service;
 import com.example.brave_people_backend.dto.*;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
-import com.example.brave_people_backend.entity.RefreshToken;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.jwt.TokenProvider;
 import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
-import com.example.brave_people_backend.repository.RefreshTokenRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -32,7 +32,6 @@ public class AuthService {
     private final EmailRepository emailRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final JavaMailSender javaMailSender;
 
     // 회원가입 service
@@ -76,23 +75,15 @@ public class AuthService {
         //authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
         Authentication authenticate = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        /*// 이미 DB에 refresh token이 있다면
-        if(refreshTokenRepository.findRefreshToken(authenticate.getName()).isPresent()) {
+        // Member DB에서 사용자 검색
+        Member member = memberRepository.findById(Long.parseLong(authenticate.getName()))
+                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
 
-        }*/
         // Access Token, Refresh Token 생성
         TokenDto tokenDto = tokenProvider.generateTokenDto(authenticate);
 
-        RefreshToken refreshToken = RefreshToken.builder()
-                .memberId(authenticate.getName())
-                .refreshToken(tokenDto.getRefreshToken())
-                .build();
-
-
-        // refresh token -> db 저장
-        refreshTokenRepository.save(refreshToken);
-        Member member = memberRepository.findById(Long.parseLong(authenticate.getName()))
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
+        // 회원 DB의 Refresh Token 업데이트
+        member.changeRefreshToken(tokenDto.getRefreshToken());
 
         return LoginResponseDto.builder()
                 .memberId(authenticate.getName())
@@ -112,24 +103,23 @@ public class AuthService {
         String memberId = authentication.getName();
 
         if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
-            throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
+            throw new JwtException("Refresh Token 만료");
         }
 
         // 사용자가 직접 로그아웃을 했을 경우
-        RefreshToken refreshToken = refreshTokenRepository.findRefreshToken(memberId)
-                .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
+        Member member = memberRepository.findById(Long.parseLong(memberId))
+                .orElseThrow(() -> new CustomException("로그아웃 된 사용자입니다."));
 
-        // redis에 저장된 refreshToken과 사용자가 입력한 refreshToken 비교
-        if(!refreshToken.getTokenNumber().equals(tokenRequestDto.getRefreshToken())) {
-            throw new RuntimeException("Refresh Token의 정보가 일치하지 않습니다.");
+        // DB에 저장된 refreshToken과 사용자가 입력한 refreshToken 비교
+        if(!member.getRefreshToken().equals(tokenRequestDto.getRefreshToken())) {
+            throw new InsufficientAuthenticationException("Refresh Token의 정보가 일치하지 않습니다.");
         }
 
         // refreshToken이 확인되면 새로운 token 발급
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
-        // redis에 저장된 refreshToken 정보 업데이트
-        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
-        refreshTokenRepository.save(newRefreshToken);
+        // DB에 refreshToken 업데이트
+        member.changeRefreshToken(tokenDto.getRefreshToken());
 
         return tokenDto;
     }

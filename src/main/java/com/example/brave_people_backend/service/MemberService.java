@@ -181,4 +181,17 @@ public class MemberService {
         //member의 pw를 인코딩한 후 저장
         findMember.changePw(passwordEncoder.encode(updatePwRequestDto.getNewPassword()));
     }
+
+    // 로그아웃
+    @Transactional
+    public void logout() {
+        Member member = memberRepository.findById(SecurityUtil.getCurrentId())
+                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
+
+        if(member.getRefreshToken().isEmpty()){
+            throw new CustomException("이미 로그아웃한 사용자입니다.");
+        }
+        // Refresh Token 삭제
+        member.changeRefreshToken(null);
+    }
 }

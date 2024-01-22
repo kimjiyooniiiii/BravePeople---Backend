@@ -56,6 +56,9 @@ public class Member {
     @Column(length = 5, updatable = false)
     private String name;
 
+    @Column(length = 512)
+    private String refreshToken;
+
     //위도, 경도 변환 setter
     public void changeLatAndLng(BigDecimal lat, BigDecimal lng) {
         this.lat = lat;
@@ -79,4 +82,7 @@ public class Member {
     public void changePw(String pw) {
         this.pw = pw;
     }
+
+    // Refresh Token setter
+    public void changeRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 }

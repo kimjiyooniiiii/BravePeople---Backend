@@ -1,6 +1,7 @@
 package com.example.brave_people_backend.config;
 
 import com.example.brave_people_backend.jwt.*;
+import com.example.brave_people_backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final MemberRepository memberRepository;
 
     // 비밀번호 암호화 저장
     @Bean
@@ -55,7 +57,7 @@ public class SecurityConfig {
                 )
 
                 // Filtering 순서 : JwtExceptionFilter -> JwtFilter -> UsernamePasswordAuthenticationFilter
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(tokenProvider, memberRepository), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtExceptionFilter(), JwtFilter.class)
                 .build();
     }

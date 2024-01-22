@@ -33,7 +33,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         final Map<String, Object> body = new HashMap<>();
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("error", "Unauthorized");
-        body.put("message", e.getMessage());
+        body.put("message", "Access Token 만료");
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), body);

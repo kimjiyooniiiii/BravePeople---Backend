@@ -32,8 +32,8 @@ public class MemberController {
 
     // 프로필 이미지 변경
     @PatchMapping("/profile/image")
-    public ResponseEntity<ProfileImageResponseDto> updateProfileImage(@RequestPart("file") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(memberService.updateProfileImage(file));
+    public ProfileImageResponseDto updateProfileImage(@RequestPart("file") MultipartFile file) throws IOException {
+        return memberService.updateProfileImage(file);
     }
 
     //닉네임, 자기소개 수정
@@ -53,5 +53,11 @@ public class MemberController {
     @PatchMapping("/pw")
     public void updatePassword(@RequestBody @Valid UpdatePwRequestDto updatePwRequestDto) {
         memberService.updatePassword(updatePwRequestDto);
+    }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public void logout() {
+        memberService.logout();
     }
 }
