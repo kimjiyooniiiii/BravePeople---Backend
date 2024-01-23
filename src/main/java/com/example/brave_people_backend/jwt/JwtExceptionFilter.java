@@ -1,6 +1,6 @@
 package com.example.brave_people_backend.jwt;
 
-import com.example.brave_people_backend.dto.ApiExceptionDto;
+import com.example.brave_people_backend.exception.dto.ApiExceptionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

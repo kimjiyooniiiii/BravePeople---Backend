@@ -1,6 +1,6 @@
 package com.example.brave_people_backend.exception;
 
-import com.example.brave_people_backend.dto.ApiExceptionDto;
+import com.example.brave_people_backend.exception.dto.ApiExceptionDto;
 import org.springframework.http.HttpHeaders;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package com.example.brave_people_backend.jwt;
 
-import com.example.brave_people_backend.dto.TokenDto;
+import com.example.brave_people_backend.auth.dto.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
