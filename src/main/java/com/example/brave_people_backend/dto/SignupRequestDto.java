@@ -33,10 +33,8 @@ public class SignupRequestDto {
     @NotBlank @Size(max = 6)
     private String nickname;
 
-    @NotBlank
     private String lat;
 
-    @NotBlank
     private String lng;
 
     @NotNull
