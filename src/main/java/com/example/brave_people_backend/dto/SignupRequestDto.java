@@ -47,8 +47,8 @@ public class SignupRequestDto {
                 .email(email)
                 .nickname(nickname)
                 .gender(gender.equals("여성"))
-                .lat(new BigDecimal(lat))
-                .lng(new BigDecimal(lng))
+                .lat(new BigDecimal(lat == null ? "37.566815192" : lat))
+                .lng(new BigDecimal(lng == null ? "126.97864095" : lng))
                 .authority(Authority.ROLE_USER)
                 .name(name)
                 .build();

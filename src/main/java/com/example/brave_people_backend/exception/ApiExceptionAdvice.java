@@ -40,7 +40,7 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
                 .build();
     }
 
-    @Override
+    @Override //TODO Pattern 에러메시지 자연스럽게, "errorMessage"를 바로 alert창에 띄울 수 있도록 자연스럽게
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatusCode status,
                                                                   WebRequest request) {

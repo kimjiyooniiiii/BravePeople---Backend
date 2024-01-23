@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
@@ -35,11 +34,11 @@ public class Member {
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     private boolean gender;
 
-    @ColumnDefault("37.566770140877412") //위치 정보가 없는 경우 default 위도 : 서울특별시청
+//    @ColumnDefault("37.566770140877412") //위치 정보가 없는 경우 default 위도 : 서울특별시청
     @Column(precision = 18, scale=15, nullable = false) //전체 자릿수는 18개, 소수점 자릿수는 15개
     private BigDecimal lat;
 
-    @ColumnDefault("126.978640955202641") //위치 정보가 없는 경우 default 경도 : 서울특별시청
+//    @ColumnDefault("126.978640955202641") //위치 정보가 없는 경우 default 경도 : 서울특별시청
     @Column(precision = 18, scale=15, nullable = false)
     private BigDecimal lng;
 
