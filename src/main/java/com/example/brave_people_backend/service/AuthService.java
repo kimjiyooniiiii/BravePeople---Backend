@@ -197,7 +197,7 @@ public class AuthService {
         emailRepository.save(emailEntity);
         // 4. 재설정 링크(:3000) 전송
         try {
-            sendFindPwMail(emailEntity, findMember.getMemberId());
+            sendFindPwMail(emailEntity);
         } catch (MessagingException e) {
             throw new CustomException("이메일 전송 오류");
         }
@@ -238,12 +238,12 @@ public class AuthService {
         javaMailSender.send(message);
     }
 
-    public void sendFindPwMail(Email emailEntity, Long memeberId) throws MessagingException {
+    public void sendFindPwMail(Email emailEntity) throws MessagingException {
         String fromMail = "brave.knu@gmail.com"; //email-config에 설정한 자신의 이메일 주소(보내는 사람)
         String toMail = emailEntity.getEmailAddress(); //받는 사람
         String title = "[용감한원정대] 비밀번호 찾기 링크"; //제목
         String authLink =
-                "http://localhost:3000/resetpw?memberid=" + memeberId
+                "http://localhost:3000/resetpw?emailid=" + emailEntity.getEmailId()
                         + "&code=" + emailEntity.getAuthCode();
         String text =
                 "<!DOCTYPE html>\n" +

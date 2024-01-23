@@ -168,7 +168,7 @@ public class MemberService {
                     .getMemberId();
 
             // 인증코드 일치 여부 확인했으므로 EMAIL 테이블에서 삭제
-            emailRepository.delete(emailEntity);
+            emailRepository.deleteByEmailAddress(emailEntity.getEmailAddress());
         }
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(currentMemberId)
