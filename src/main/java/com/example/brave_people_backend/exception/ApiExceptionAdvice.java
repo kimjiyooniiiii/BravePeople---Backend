@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,18 +42,10 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatusCode status,
                                                                   WebRequest request) {
-        BindingResult bindingResult = ex.getBindingResult();
-        StringBuilder sb = new StringBuilder();
-
-        for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            sb.append("[(").append(fieldError.getField()).append(")(은)는 ");
-            sb.append(fieldError.getDefaultMessage()).append(".");
-            sb.append(" 입력된 값: (").append(fieldError.getRejectedValue()).append(")] ");
-        }
 
         ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
-                .errorMessage(sb.toString())
+                .errorMessage("Invalid request content.")
                 .build();
 
         return new ResponseEntity<>(apiExceptionDto, HttpStatus.BAD_REQUEST);
