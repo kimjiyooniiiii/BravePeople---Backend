@@ -37,7 +37,6 @@ public class SignupRequestDto {
 
     private String lng;
 
-    @NotNull
     private Long emailId;
 
     public Member toMember(PasswordEncoder passwordEncoder) {
