@@ -21,10 +21,10 @@ public class SignupRequestDto {
     @NotBlank @Size(min = 2, max = 2)
     private String gender;
 
-    @NotBlank @Size(min = 6, max = 20)
+    @NotBlank @Size(min = 6, max = 20, message = "아이디 형식 오류")
     private String username;
 
-    @NotBlank  @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$") // 영문 + 숫자, 8자리 아상
+    @NotBlank  @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "비밀번호 형식 오류") // 영문 + 숫자, 8자리 아상
     private String pw;
 
     @NotBlank @Size(max = 30) @Email

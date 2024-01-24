@@ -116,10 +116,14 @@ public class MemberService {
             //중복이 아니면 닉네임 변경
             findMember.changeNickname(updateProfileInfoRequestDto.getNickname());
         }
-        //넘어온 자기소개가 null이 아니면
-        if (updateProfileInfoRequestDto.getIntroduction() != null) {
-            //자기소개 변경
-            findMember.changeIntroduction(updateProfileInfoRequestDto.getIntroduction());
+
+        if(updateProfileInfoRequestDto.getIntroduction() != null) {  //자기소개가 null이 아니고
+            if (updateProfileInfoRequestDto.getIntroduction().isEmpty()) {     //빈 문자열이면
+                findMember.changeIntroduction(null);    //자기소개 null로 변경
+            }
+            else {  //값이 있으면
+                findMember.changeIntroduction(updateProfileInfoRequestDto.getIntroduction());
+            }
         }
 
         return UpdateProfileInfoResponseDto.of(findMember);
