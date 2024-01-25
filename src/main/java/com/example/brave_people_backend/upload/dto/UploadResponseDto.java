@@ -1,4 +1,4 @@
-package com.example.brave_people_backend.member.dto;
+package com.example.brave_people_backend.upload.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
-public class ProfileImageResponseDto {
-    private String profileImage;
+public class UploadResponseDto {
+    private String imgUrl;
 }

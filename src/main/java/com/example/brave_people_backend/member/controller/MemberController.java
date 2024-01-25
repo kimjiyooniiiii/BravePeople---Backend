@@ -30,12 +30,6 @@ public class MemberController {
         return memberService.getProfileInfo(memberId);
     }
 
-    // 프로필 이미지 변경
-    @PatchMapping("/profile/image")
-    public ProfileImageResponseDto updateProfileImage(@RequestPart("file") MultipartFile file) throws IOException {
-        return memberService.updateProfileImage(file);
-    }
-
     //닉네임, 자기소개 수정
     @PatchMapping("/profile")
     public UpdateProfileInfoResponseDto updateProfileInfo(
@@ -57,7 +51,7 @@ public class MemberController {
     }
 
     // 로그아웃
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public void logout() {
         memberService.logout();
     }

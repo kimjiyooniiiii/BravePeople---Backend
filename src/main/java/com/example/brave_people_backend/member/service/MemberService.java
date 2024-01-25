@@ -56,49 +56,6 @@ public class MemberService {
         );
     }
 
-    // 프로필 이미지 변경
-    @Transactional
-    public ProfileImageResponseDto updateProfileImage(MultipartFile file) throws IOException {
-
-        // file 확장자가 올바른지 확인
-        if(getFileExtension(file)) {
-            // S3 버킷 안의 profile 폴더 지정
-            String filName = "profile/" + createFileName(file.getOriginalFilename());
-
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(file.getSize());
-            metadata.setContentType(file.getContentType());
-
-            // S3 저장
-            amazonS3.putObject(bucket, filName, file.getInputStream(), metadata);
-
-            String imgUrl = amazonS3.getUrl(bucket, filName).toString();
-            Long memberId = SecurityUtil.getCurrentId();
-
-            Member member = memberRepository.findById(memberId)
-                    .orElseThrow(()-> new CustomException("존재하지 않는 멤버ID"));
-
-            // Member DB 업데이트
-            member.changeProfileImage(imgUrl);
-
-            return ProfileImageResponseDto.builder().profileImage(imgUrl).build();
-        }
-
-        throw new CustomException("파일 업로드 실패했습니다.");
-    }
-
-    // 파일명을 난수화하기 위해 UUID를 활용하여 난수 생성
-    public String createFileName(String originalFileName){
-        return UUID.randomUUID().toString().concat(originalFileName);
-    }
-
-    // file 형식 확인
-    private boolean getFileExtension(MultipartFile file){
-        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-
-        return extension.equals("jpg") || extension.equals("png") || extension.equals("jpeg");
-    }
-
     //닉네임, 자기소개 변경
     @Transactional
     public UpdateProfileInfoResponseDto updateProfileInfo(UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {
