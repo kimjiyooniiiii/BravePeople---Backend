@@ -77,7 +77,7 @@ public class AuthService {
 
         // Member DB에서 사용자 검색
         Member member = memberRepository.findById(Long.parseLong(authenticate.getName()))
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
         // Access Token, Refresh Token 생성
         TokenDto tokenDto = tokenProvider.generateTokenDto(authenticate);
@@ -108,7 +108,7 @@ public class AuthService {
 
         // 사용자가 직접 로그아웃을 했을 경우
         Member member = memberRepository.findById(Long.parseLong(memberId))
-                .orElseThrow(() -> new CustomException("로그아웃 된 사용자입니다."));
+                .orElseThrow(() -> new CustomException("이미 로그아웃한 사용자"));
 
         // DB에 저장된 refreshToken과 사용자가 입력한 refreshToken 비교
         if(!member.getRefreshToken().equals(tokenRequestDto.getRefreshToken())) {

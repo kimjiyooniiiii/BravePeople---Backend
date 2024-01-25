@@ -41,7 +41,7 @@ public class MemberService {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
-                .orElseThrow(() -> new CustomException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
         //위도, 경도 변경
         findMember.changeLatAndLng(new BigDecimal(locationRequestDto.getLat()), new BigDecimal(locationRequestDto.getLng()));
@@ -52,7 +52,7 @@ public class MemberService {
     // 프로필 페이지
     public ProfileResponseDto getProfileInfo(Long memberId) {
         return ProfileResponseDto.of(memberRepository.findById(memberId).orElseThrow(
-                () -> new CustomException("유효하지 않은 멤버ID"))
+                () -> new CustomException("존재하지 않는 멤버ID"))
         );
     }
 
@@ -76,7 +76,7 @@ public class MemberService {
             Long memberId = SecurityUtil.getCurrentId();
 
             Member member = memberRepository.findById(memberId)
-                    .orElseThrow(()-> new CustomException("사용자를 찾을 수 없습니다."));
+                    .orElseThrow(()-> new CustomException("존재하지 않는 멤버ID"));
 
             // Member DB 업데이트
             member.changeProfileImage(imgUrl);
@@ -84,7 +84,7 @@ public class MemberService {
             return ProfileImageResponseDto.builder().profileImage(imgUrl).build();
         }
 
-        throw new CustomException("파일 업로드에 실패했습니다.");
+        throw new CustomException("파일 업로드 실패했습니다.");
     }
 
     // 파일명을 난수화하기 위해 UUID를 활용하여 난수 생성
@@ -105,26 +105,14 @@ public class MemberService {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
-                .orElseThrow(() -> new CustomException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
-        //넘어온 닉네임이 null인지 체크
-        if (updateProfileInfoRequestDto.getNickname() != null) {
-            //닉네임 중복 체크
-            if (memberRepository.existsByNickname(updateProfileInfoRequestDto.getNickname())) {
-                throw new CustomException("닉네임 중복 오류");
-            }
-            //중복이 아니면 닉네임 변경
-            findMember.changeNickname(updateProfileInfoRequestDto.getNickname());
+        if (memberRepository.existsByNickname(updateProfileInfoRequestDto.getNickname())
+            && !findMember.getNickname().equals(updateProfileInfoRequestDto.getNickname())) {
+            throw new CustomException("닉네임 중복");
         }
-
-        if(updateProfileInfoRequestDto.getIntroduction() != null) {  //자기소개가 null이 아니고
-            if (updateProfileInfoRequestDto.getIntroduction().isEmpty()) {     //빈 문자열이면
-                findMember.changeIntroduction(null);    //자기소개 null로 변경
-            }
-            else {  //값이 있으면
-                findMember.changeIntroduction(updateProfileInfoRequestDto.getIntroduction());
-            }
-        }
+        findMember.changeNicknameAndIntroduction(updateProfileInfoRequestDto.getNickname(),
+        updateProfileInfoRequestDto.getIntroduction());
 
         return UpdateProfileInfoResponseDto.of(findMember);
     }
@@ -135,11 +123,11 @@ public class MemberService {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
-                .orElseThrow(() -> new CustomException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
         //passwordEncoder로 현재 입력한 비밀번호와 DB에 있는 비밀번호가 같은지 검사
         if (!passwordEncoder.matches(pwReconfirmRequestDto.getNowPassword(), findMember.getPw())) {
-            throw new CustomException("잘못된 비밀번호 입니다.");
+            throw new CustomException("잘못된 비밀번호");
         }
     }
 
@@ -159,7 +147,7 @@ public class MemberService {
 
             // Email 엔티티 불러오고 인증코드 일치여부 확인
             Email emailEntity = emailRepository.findById(updatePwRequestDto.getEmailId())
-                    .orElseThrow(() -> new CustomException("유효하지 않은 이메일ID"));
+                    .orElseThrow(() -> new CustomException("존재하지 않는 이메일ID"));
             if (emailEntity.getAuthCode() != updatePwRequestDto.getAuthCode()) {
                 throw new CustomException("일치하지 않은 인증코드");
             }
@@ -174,7 +162,7 @@ public class MemberService {
         }
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(currentMemberId)
-                .orElseThrow(() -> new CustomException("유효하지 않은 멤버ID"));
+                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
         // oldPassword와 newPassword가 일치할 시 예외 발생
         if (passwordEncoder.matches(updatePwRequestDto.getNewPassword(), findMember.getPw())) {
@@ -188,10 +176,10 @@ public class MemberService {
     @Transactional
     public void logout() {
         Member member = memberRepository.findById(SecurityUtil.getCurrentId())
-                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
         if(member.getRefreshToken().isEmpty()){
-            throw new CustomException("이미 로그아웃한 사용자입니다.");
+            throw new CustomException("이미 로그아웃한 사용자");
         }
         // Refresh Token 삭제
         member.changeRefreshToken(null);

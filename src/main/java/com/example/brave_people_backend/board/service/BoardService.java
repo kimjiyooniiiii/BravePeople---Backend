@@ -44,7 +44,7 @@ public class BoardService {
         else {
             //currentMemberId로 현재 로그인 한 Member 엔티티를 반환
             Member findMember = memberRepository.findById(currentMemberId)
-                    .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
             //Member 엔티티에서 위도 경도 데이터 반환
             BigDecimal lat = findMember.getLat();

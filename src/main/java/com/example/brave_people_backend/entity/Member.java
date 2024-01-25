@@ -64,13 +64,8 @@ public class Member {
         this.lng = lng;
     }
 
-    //닉네임 setter
-    public void changeNickname(String nickname) {
+    public void changeNicknameAndIntroduction(String nickname, String introduction) {
         this.nickname = nickname;
-    }
-
-    //자기소개 setter
-    public void changeIntroduction(String introduction) {
         this.introduction = introduction;
     }
 
