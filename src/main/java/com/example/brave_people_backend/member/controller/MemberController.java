@@ -57,7 +57,7 @@ public class MemberController {
     }
 
     // 로그아웃
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public void logout() {
         memberService.logout();
     }
