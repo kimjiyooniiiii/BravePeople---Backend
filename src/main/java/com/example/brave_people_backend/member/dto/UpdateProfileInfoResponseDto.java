@@ -14,12 +14,14 @@ public class UpdateProfileInfoResponseDto {
 
      String nickname;
      String introduction;
+     String profileImg;
 
     // UpdateProfileInfoResponseDto 객체를 생성하는 함수 (of 함수를 이용함으로서 유지보수 편리)
     public static UpdateProfileInfoResponseDto of(Member member) {
          return UpdateProfileInfoResponseDto.builder()
                  .nickname(member.getNickname())
                  .introduction(member.getIntroduction())
+                 .profileImg(member.getProfileImg())
                  .build();
      }
 }

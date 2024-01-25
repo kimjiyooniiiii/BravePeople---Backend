@@ -18,4 +18,6 @@ public class UpdateProfileInfoRequestDto {
 
     @Size(max = 50)
     String introduction;
+
+    String profileImg;
 }

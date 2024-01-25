@@ -64,13 +64,11 @@ public class Member {
         this.lng = lng;
     }
 
-    public void changeNicknameAndIntroduction(String nickname, String introduction) {
+    public void changeProfileInfo(String nickname, String introduction, String profileImg) {
         this.nickname = nickname;
         this.introduction = introduction;
+        this.profileImg = profileImg;
     }
-
-    // 프로필 이미지 setter
-    public void changeProfileImage(String profileImg) { this.profileImg = profileImg; }
 
     //비밀번호 setter
     public void changePw(String pw) {

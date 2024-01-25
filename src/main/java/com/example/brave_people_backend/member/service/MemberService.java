@@ -1,7 +1,5 @@
 package com.example.brave_people_backend.member.service;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.exception.CustomException;
@@ -10,16 +8,11 @@ import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,12 +21,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final EmailRepository emailRepository;
-    private final AmazonS3 amazonS3;
     private final PasswordEncoder passwordEncoder;
-
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
 
     //위치 정보 변경
     @Transactional
@@ -56,7 +44,7 @@ public class MemberService {
         );
     }
 
-    //닉네임, 자기소개 변경
+    //닉네임, 자기소개, 프로필 이미지 변경
     @Transactional
     public UpdateProfileInfoResponseDto updateProfileInfo(UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {
 
@@ -68,8 +56,9 @@ public class MemberService {
             && !findMember.getNickname().equals(updateProfileInfoRequestDto.getNickname())) {
             throw new CustomException("닉네임 중복");
         }
-        findMember.changeNicknameAndIntroduction(updateProfileInfoRequestDto.getNickname(),
-        updateProfileInfoRequestDto.getIntroduction());
+        findMember.changeProfileInfo(updateProfileInfoRequestDto.getNickname(),
+                                    updateProfileInfoRequestDto.getIntroduction(),
+                                    updateProfileInfoRequestDto.getProfileImg());
 
         return UpdateProfileInfoResponseDto.of(findMember);
     }
