@@ -1,12 +1,12 @@
 package com.example.brave_people_backend.board.controller;
 
+import com.example.brave_people_backend.board.dto.CreatePostRequestDto;
 import com.example.brave_people_backend.board.dto.PostListResponseDto;
 import com.example.brave_people_backend.board.service.BoardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/posts")
@@ -22,5 +22,12 @@ public class BoardController {
                                                  @RequestParam("amount") Integer amount) {
 
         return boardService.getPostList(type, distance, page, amount);
+    }
+
+    //글 작성
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createPost(@Valid @RequestBody CreatePostRequestDto createPostRequestDto) {
+        boardService.createPost(createPostRequestDto);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.brave_people_backend.board.service;
 
+import com.example.brave_people_backend.board.dto.CreatePostRequestDto;
 import com.example.brave_people_backend.board.dto.PostListResponseDto;
 import com.example.brave_people_backend.board.dto.PostListVo;
 import com.example.brave_people_backend.entity.Member;
@@ -59,4 +60,15 @@ public class BoardService {
 
     }
 
+    @Transactional
+    //글 작성
+    public void createPost(CreatePostRequestDto createPostRequestDto) {
+
+        //토큰으로 현재 회원 검색, 없으면 예외처리
+        Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
+                .orElseThrow(() -> new CustomException("회원을 찾을 수 없습니다."));
+
+        //게시글 저장
+        boardRepository.save(createPostRequestDto.toPost(findMember));
+    }
 }
