@@ -116,6 +116,8 @@ public class MemberService {
         }
         //member의 pw를 인코딩한 후 저장
         findMember.changePw(passwordEncoder.encode(updatePwRequestDto.getNewPassword()));
+        // Refresh Token 삭제, 로그아웃 처리
+        findMember.changeRefreshToken(null);
     }
 
     // 로그아웃
