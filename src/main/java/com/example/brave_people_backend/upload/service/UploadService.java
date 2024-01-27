@@ -39,7 +39,7 @@ public class UploadService {
             return UploadResponseDto.builder().imgUrl(imgUrl).build();
         }
 
-        throw new CustomException("파일 업로드 실패");
+        throw new CustomException(file.getOriginalFilename(), "파일 업로드 실패");
     }
 
     // 파일명을 난수화하기 위해 UUID를 활용하여 난수 생성

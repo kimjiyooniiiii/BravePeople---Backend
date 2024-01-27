@@ -29,7 +29,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 .status(HttpStatus.UNAUTHORIZED.toString())
                 .errorMessage("비회원 접근 불가")
                 .build();
-        log.error(apiExceptionDto.getErrorMessage());
+        log.error("비회원 접근 불가");
 
         ObjectMapper objectMapper = new ObjectMapper();
         String result = objectMapper.writeValueAsString(apiExceptionDto);

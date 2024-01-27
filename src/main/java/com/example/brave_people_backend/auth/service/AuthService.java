@@ -42,23 +42,23 @@ public class AuthService {
 
         // 1. 아이디 중복체크
         if (memberRepository.existsByUsername(signupRequestDto.getUsername())) {
-            throw new CustomException("아이디 중복");
+            throw new CustomException(signupRequestDto.getUsername(), "아이디 중복");
         }
 
         // 2. 닉네임 중복체크
         if (memberRepository.existsByNickname(signupRequestDto.getNickname())) {
-            throw new CustomException("닉네임 중복");
+            throw new CustomException(signupRequestDto.getUsername(), "닉네임 중복");
         }
 
         // 3. 이메일 미인증시 예외 발생
         Long emailId = signupRequestDto.getEmailId();
         if (emailId == null) {
-            throw new CustomException("이메일 미인증");
+            throw new CustomException(signupRequestDto.getEmail(), "이메일 미인증");
         }
         Email emailEntity = emailRepository.findById(emailId).orElseThrow(
-                () -> new CustomException("이메일 미인증"));
+                () -> new CustomException(signupRequestDto.getEmail(), "이메일 미인증"));
         if (!emailEntity.isAuthStatus()) {
-            throw new CustomException("이메일 미인증");
+            throw new CustomException(signupRequestDto.getEmail(), "이메일 미인증");
         }
 
         // 4. 중복된 Member가 없을 경우, DB 저장
@@ -79,7 +79,7 @@ public class AuthService {
 
         // Member DB에서 사용자 검색
         Member member = memberRepository.findById(Long.parseLong(authenticate.getName()))
-                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
+                .orElseThrow(() -> new CustomException(authenticate.getName(), "존재하지 않는 멤버ID"));
 
         // Access Token, Refresh Token 생성
         TokenDto tokenDto = tokenProvider.generateTokenDto(authenticate);
@@ -110,7 +110,7 @@ public class AuthService {
 
         // 사용자가 직접 로그아웃을 했을 경우
         Member member = memberRepository.findById(Long.parseLong(memberId))
-                .orElseThrow(() -> new CustomException("이미 로그아웃한 사용자"));
+                .orElseThrow(() -> new CustomException(memberId, "이미 로그아웃한 사용자"));
 
         // DB에 저장된 refreshToken과 사용자가 입력한 refreshToken 비교
         if(!member.getRefreshToken().equals(tokenRequestDto.getRefreshToken())) {
@@ -130,7 +130,7 @@ public class AuthService {
     @Transactional
     public UsernameResponseDto findByEmail(String email) {
         Member findMember = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("존재하지 않는 이메일"));
+                .orElseThrow(() -> new CustomException(email, "존재하지 않는 이메일"));
         return UsernameResponseDto.of((findMember.getUsername()).
                 substring(0, (findMember.getUsername()).length()-3) + "***");
     }
@@ -139,13 +139,13 @@ public class AuthService {
     public Long emailCheckAndSendMail(String email) {
         // 1. MEMBER 테이블에서 이메일 중복체크 먼저
         if (memberRepository.existsByEmail(email)) {
-            throw new CustomException("이메일 중복");
+            throw new CustomException(email, "이메일 중복");
         }
 
         // 2. EMAIL 테이블에서 status = true인 레코드가 있는지 확인
         // status = true인 레코드가 있을 경우 중복이므로 400 에러 반환
         if (emailRepository.findByEmailAddress(email).stream().anyMatch(Email::isAuthStatus)) {
-            throw new CustomException("이미 가입 진행 중인 이메일");
+            throw new CustomException(email, "이미 가입 진행 중인 이메일");
         }
 
         // 3. Email Entity 생성 및 테이블에 저장
@@ -162,7 +162,7 @@ public class AuthService {
             sendSignupMail(emailEntity);
             return emailEntity.getEmailId();
         } catch (MessagingException e) {
-            throw new CustomException("이메일 전송 오류");
+            throw new CustomException(email, "이메일 전송 오류");
         }
 
     }
@@ -173,6 +173,7 @@ public class AuthService {
         Optional<Email> emailEntity = emailRepository.findById(emailId); //테이블의 emailEntity
 
         if (emailEntity.isEmpty()) {
+            log.error(emailId + "는 유효하지 않은 이메일 주소입니다. URL 주소를 확인하여 주세요.");
             return "유효하지 않은 이메일 주소입니다. URL 주소를 확인하여 주세요.";
         }
 
@@ -180,6 +181,7 @@ public class AuthService {
             emailEntity.get().onAuthStatus(); // authCode가 일치하면 authStatus = true 변경
             return "이메일 인증을 완료했습니다. 홈페이지로 이동해 로그인하여 주시기 바랍니다.";
         } else {
+            log.error("[emailId : " + emailId + "],[authCode : " + authCode + "] " + "유효하지 않은 인증코드입니다. URL 주소를 확인하여 주세요.");
             return "유효하지 않은 인증코드입니다. URL 주소를 확인하여 주세요.";
         }
     }
@@ -188,9 +190,9 @@ public class AuthService {
     @Transactional
     public void findPasswordAndSendMail(String username, String email) {
         // 1. 아이디 체크
-        Member findMember = memberRepository.findByUsername(username).orElseThrow(() -> new CustomException("존재하지 않는 아이디"));
+        Member findMember = memberRepository.findByUsername(username).orElseThrow(() -> new CustomException(username, "존재하지 않는 아이디"));
         // 2. 이메일 체크
-        if (!findMember.getEmail().equals(email)) { throw new CustomException("존재하지 않는 이메일"); }
+        if (!findMember.getEmail().equals(email)) { throw new CustomException(email, "존재하지 않는 이메일"); }
         // 3. Email Entity 생성 및 테이블에 저장
         Email emailEntity = Email.builder()
                 .emailAddress(email)
@@ -202,7 +204,7 @@ public class AuthService {
         try {
             sendFindPwMail(emailEntity);
         } catch (MessagingException e) {
-            throw new CustomException("이메일 전송 오류");
+            throw new CustomException(email, "이메일 전송 오류");
         }
     }
 

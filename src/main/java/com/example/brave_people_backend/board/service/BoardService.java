@@ -46,7 +46,7 @@ public class BoardService {
         else {
             //currentMemberId로 현재 로그인 한 Member 엔티티를 반환
             Member findMember = memberRepository.findById(currentMemberId)
-                    .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
+                    .orElseThrow(() -> new CustomException(String.valueOf(currentMemberId), "존재하지 않는 멤버ID"));
 
             //Member 엔티티에서 위도 경도 데이터 반환
             BigDecimal lat = findMember.getLat();
@@ -63,10 +63,11 @@ public class BoardService {
 
     //글 작성
     public void createPost(PostRequestDto postRequestDto) {
+        Long currentMemberId = SecurityUtil.getCurrentId();
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
-        Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
-                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
+        Member findMember = memberRepository.findById(currentMemberId)
+                .orElseThrow(() -> new CustomException(String.valueOf(currentMemberId), "존재하지 않는 멤버ID"));
 
         //게시글 저장
         boardRepository.save(postRequestDto.toPost(findMember));
@@ -75,10 +76,10 @@ public class BoardService {
     @Transactional(readOnly = true)
     public PostResponseDto getPost(Long postId) {
         Post findPost = boardRepository.findById(postId).
-                orElseThrow(() -> new Custom404Exception("존재하지 않는 게시글"));
+                orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
 
         if (findPost.isDeleted()) {
-            throw new Custom404Exception("존재하지 않는 게시글");
+            throw new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글");
         }
 
         return PostResponseDto.of(findPost);
