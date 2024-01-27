@@ -1,16 +1,16 @@
 package com.example.brave_people_backend.jwt;
 
+import com.example.brave_people_backend.exception.dto.ApiExceptionDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 // 인증 실패시 핸들링 - 401에러
 @Component
@@ -26,16 +26,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
 
-        final Map<String, Object> body = new HashMap<>();
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        // 응답 객체 초기화
-        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        body.put("error", "Unauthorized");
-        body.put("message", authException.getMessage());
-        body.put("path", request.getServletPath());
-        final ObjectMapper mapper = new ObjectMapper();
-        // response 객체에 응답 객체를 넣어줌
-        mapper.writeValue(response.getOutputStream(), body);
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setCharacterEncoding("utf-8");
+
+        ApiExceptionDto apiExceptionDto = ApiExceptionDto.builder()
+                .status(HttpStatus.UNAUTHORIZED.toString())
+                .errorMessage("비회원 접근 불가")
+                .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String result = objectMapper.writeValueAsString(apiExceptionDto);
+        response.getWriter().write(result);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
 }
