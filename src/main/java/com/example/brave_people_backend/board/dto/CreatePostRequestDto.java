@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 @Getter
 @NoArgsConstructor
@@ -26,6 +27,7 @@ public class CreatePostRequestDto {
     @NotBlank @Size(max = 1000)
     private String contents;
 
+    @Range(min = -1, max = 999999)
     private int price;
 
     @Pattern(regexp = "^(벌레|전화|환불|기타)$")
@@ -36,13 +38,13 @@ public class CreatePostRequestDto {
     public Post toPost(Member member) {
         return Post.builder()
                 .member(member)
-                .category(Enum.valueOf(Category.class, category))
+                .category(Category.valueOf(category))
                 .title(title)
                 .contents(contents)
                 .price(price)
                 .lat(member.getLat())
                 .lng(member.getLng())
-                .act(Enum.valueOf(Act.class, type))
+                .act(Act.valueOf(type))
                 .url(img)
                 .build();
     }
