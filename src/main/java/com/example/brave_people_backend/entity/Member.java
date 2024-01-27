@@ -1,6 +1,7 @@
 package com.example.brave_people_backend.entity;
 
 import com.example.brave_people_backend.enumclass.Authority;
+import com.example.brave_people_backend.member.dto.UpdateProfileInfoRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -64,12 +65,6 @@ public class Member {
         this.lng = lng;
     }
 
-    public void changeProfileInfo(String nickname, String introduction, String profileImg) {
-        this.nickname = nickname;
-        this.introduction = introduction;
-        this.profileImg = profileImg;
-    }
-
     //비밀번호 setter
     public void changePw(String pw) {
         this.pw = pw;
@@ -77,4 +72,10 @@ public class Member {
 
     // Refresh Token setter
     public void changeRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
+
+    public void changeProfileInfo(UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {
+        this.nickname = updateProfileInfoRequestDto.getNickname();
+        this.introduction = updateProfileInfoRequestDto.getIntroduction();
+        this.profileImg = updateProfileInfoRequestDto.getProfileImg();
+    }
 }

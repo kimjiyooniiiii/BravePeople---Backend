@@ -1,5 +1,6 @@
 package com.example.brave_people_backend.entity;
 
+import com.example.brave_people_backend.board.dto.PostRequestDto;
 import com.example.brave_people_backend.enumclass.Act;
 import com.example.brave_people_backend.enumclass.Category;
 import jakarta.persistence.*;
@@ -66,4 +67,16 @@ public class Post {
     @Column(length = 260)
     private String url;
 
+
+    public void updatePost(PostRequestDto postRequestDto) {
+        this.category = Category.valueOf(postRequestDto.getCategory());
+        this.title = postRequestDto.getTitle();
+        this.contents = postRequestDto.getContents();
+        this.price = postRequestDto.getPrice();
+        this.url = postRequestDto.getImg();
+    }
+
+    public void onDeleted() {
+        isDeleted = true;
+    }
 }

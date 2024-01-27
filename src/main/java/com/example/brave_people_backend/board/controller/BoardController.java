@@ -1,6 +1,6 @@
 package com.example.brave_people_backend.board.controller;
 
-import com.example.brave_people_backend.board.dto.CreatePostRequestDto;
+import com.example.brave_people_backend.board.dto.PostRequestDto;
 import com.example.brave_people_backend.board.dto.PostListResponseDto;
 import com.example.brave_people_backend.board.dto.PostResponseDto;
 import com.example.brave_people_backend.board.service.BoardService;
@@ -29,8 +29,8 @@ public class BoardController {
     //글 작성
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createPost(@Valid @RequestBody CreatePostRequestDto createPostRequestDto) {
-        boardService.createPost(createPostRequestDto);
+    public void createPost(@Valid @RequestBody PostRequestDto postRequestDto) {
+        boardService.createPost(postRequestDto);
     }
 
     //글 조회
@@ -38,4 +38,17 @@ public class BoardController {
     public PostResponseDto getPost(@PathVariable("postId") Long postId) {
         return boardService.getPost(postId);
     }
+
+    //글 수정
+    @PatchMapping("/{postId}")
+    public void updatePost(@PathVariable("postId") Long postId, @Valid @RequestBody PostRequestDto postRequestDto) {
+        boardService.updatePost(postId, postRequestDto);
+    }
+
+    //글 삭제
+    @DeleteMapping("/{postId}")
+    public void deletePost(@PathVariable("postId") Long postId) {
+        boardService.deletePost(postId);
+    }
+
 }

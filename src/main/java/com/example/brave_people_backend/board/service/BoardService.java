@@ -1,9 +1,6 @@
 package com.example.brave_people_backend.board.service;
 
-import com.example.brave_people_backend.board.dto.CreatePostRequestDto;
-import com.example.brave_people_backend.board.dto.PostListResponseDto;
-import com.example.brave_people_backend.board.dto.PostListVo;
-import com.example.brave_people_backend.board.dto.PostResponseDto;
+import com.example.brave_people_backend.board.dto.*;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
 import com.example.brave_people_backend.enumclass.Act;
@@ -23,13 +20,14 @@ import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BoardService {
 
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
 
     // 글 목록 불러오기
-    @Transactional
+    @Transactional(readOnly = true)
     public PostListResponseDto getPostList(String type, Integer distance, Integer page, Integer amount) {
 
         Long currentMemberId = SecurityUtil.getCurrentId(); //현재 로그인 한 MemberId 반환
@@ -63,19 +61,18 @@ public class BoardService {
 
     }
 
-    @Transactional
     //글 작성
-    public void createPost(CreatePostRequestDto createPostRequestDto) {
+    public void createPost(PostRequestDto postRequestDto) {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
                 .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
         //게시글 저장
-        boardRepository.save(createPostRequestDto.toPost(findMember));
+        boardRepository.save(postRequestDto.toPost(findMember));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PostResponseDto getPost(Long postId) {
         Post findPost = boardRepository.findById(postId).
                 orElseThrow(() -> new Custom404Exception("존재하지 않는 게시글"));
@@ -85,5 +82,38 @@ public class BoardService {
         }
 
         return PostResponseDto.of(findPost);
+    }
+
+    //글 수정
+    public void updatePost(Long postId, PostRequestDto postRequestDto) {
+        //pathvariable에서 받은 postId로 post 객체 검색
+        Post findPost = boardRepository.findPostById(postId)
+                .orElseThrow(() -> new CustomException("존재하지 않는 게시글"));
+
+        //현재 Post의 작성자와 다르면
+        if (!findPost.getMember().getMemberId().equals(SecurityUtil.getCurrentId())) {
+            throw new CustomException("권한 없음");
+        }
+
+        findPost.updatePost(postRequestDto);
+    }
+
+    //글 삭제
+    public void deletePost(Long postId) {
+
+        //pathvariable에서 받은 postId로 post 객체 검색
+        Post findPost = boardRepository.findPostById(postId)
+                .orElseThrow(() -> new Custom404Exception("존재하지 않는 게시글"));
+
+        //현재 Post의 작성자와 다르면
+        if (!findPost.getMember().getMemberId().equals(SecurityUtil.getCurrentId())) {
+            throw new CustomException("권한 없음");
+        }
+
+        if (findPost.isDeleted()) {
+            throw new Custom404Exception("존재하지 않는 게시글");
+        }
+
+        findPost.onDeleted();
     }
 }

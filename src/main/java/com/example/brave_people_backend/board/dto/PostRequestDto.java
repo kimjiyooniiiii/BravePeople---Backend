@@ -15,7 +15,7 @@ import org.hibernate.validator.constraints.Range;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatePostRequestDto {
+public class PostRequestDto {
 
     //게시글 작성 request dto
     @Pattern(regexp = "^(의뢰인|원정대)$")
@@ -35,6 +35,7 @@ public class CreatePostRequestDto {
 
     private String img;
 
+    //Post 객체 생성
     public Post toPost(Member member) {
         return Post.builder()
                 .member(member)

@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Post, Long> {
@@ -30,4 +31,7 @@ public interface BoardRepository extends JpaRepository<Post, Long> {
 
     @Query("select p from Post p join fetch p.member where p.member.memberId = :memberId and p.isDeleted = false")
     Slice<Post> findPostListByProfilePage(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("select p from Post p where p.postId = :postId and p.isDeleted = false and p.isDisabled = false")
+    Optional<Post> findPostById(Long postId);
 }

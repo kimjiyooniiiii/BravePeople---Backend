@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class MemberService {
 
     private final BoardRepository boardRepository;
@@ -29,7 +29,6 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     //위치 정보 변경
-    @Transactional
     public LocationResponseDto updateLocation(LocationRequestDto locationRequestDto) {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
@@ -43,6 +42,7 @@ public class MemberService {
     }
 
     // 프로필 페이지
+    @Transactional(readOnly = true)
     public ProfileResponseDto getProfileInfo(Long memberId) {
         Sort sort = Sort.by(Sort.Direction.DESC, "postId"); //POST 테이블의 post_id 기준 내림차순 정렬 설정
         PageRequest pageRequest = PageRequest.of(0, 5, sort); //출력할 page와 amount 및 sort 기준 설정 (pageable 구현체)
@@ -54,7 +54,6 @@ public class MemberService {
     }
 
     //닉네임, 자기소개, 프로필 이미지 변경
-    @Transactional
     public UpdateProfileInfoResponseDto updateProfileInfo(UpdateProfileInfoRequestDto updateProfileInfoRequestDto) {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
@@ -65,15 +64,12 @@ public class MemberService {
             && !findMember.getNickname().equals(updateProfileInfoRequestDto.getNickname())) {
             throw new CustomException("닉네임 중복");
         }
-        findMember.changeProfileInfo(updateProfileInfoRequestDto.getNickname(),
-                                    updateProfileInfoRequestDto.getIntroduction(),
-                                    updateProfileInfoRequestDto.getProfileImg());
+        findMember.changeProfileInfo(updateProfileInfoRequestDto);
 
         return UpdateProfileInfoResponseDto.of(findMember);
     }
 
     //비밀번호 인증
-    @Transactional
     public void reconfirmPassword(PwReconfirmRequestDto pwReconfirmRequestDto) {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
@@ -87,7 +83,6 @@ public class MemberService {
     }
 
     //비밀번호 재설정
-    @Transactional
     public void updatePassword(UpdatePwRequestDto updatePwRequestDto) {
 
         Long currentMemberId = SecurityUtil.getCurrentId();
@@ -129,7 +124,6 @@ public class MemberService {
     }
 
     // 로그아웃
-    @Transactional
     public void logout() {
         Member member = memberRepository.findById(SecurityUtil.getCurrentId())
                 .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
