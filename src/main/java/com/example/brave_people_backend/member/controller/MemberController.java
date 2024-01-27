@@ -7,9 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,8 +22,8 @@ public class MemberController {
     }
 
     // 프로필 페이지
-    @GetMapping("/profile")
-    public ProfileResponseDto getProfileInfo(@RequestParam("memberid") Long memberId) {
+    @GetMapping("/profile/{memberId}")
+    public ProfileResponseDto getProfileInfo(@PathVariable("memberId") Long memberId) {
         return memberService.getProfileInfo(memberId);
     }
 
