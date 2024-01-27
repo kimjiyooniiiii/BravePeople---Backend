@@ -3,9 +3,11 @@ package com.example.brave_people_backend.board.service;
 import com.example.brave_people_backend.board.dto.CreatePostRequestDto;
 import com.example.brave_people_backend.board.dto.PostListResponseDto;
 import com.example.brave_people_backend.board.dto.PostListVo;
+import com.example.brave_people_backend.board.dto.PostResponseDto;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
 import com.example.brave_people_backend.enumclass.Act;
+import com.example.brave_people_backend.exception.Custom404Exception;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.BoardRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
@@ -66,9 +68,21 @@ public class BoardService {
 
         //토큰으로 현재 회원 검색, 없으면 예외처리
         Member findMember = memberRepository.findById(SecurityUtil.getCurrentId())
-                .orElseThrow(() -> new CustomException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
         //게시글 저장
         boardRepository.save(createPostRequestDto.toPost(findMember));
+    }
+
+    @Transactional
+    public PostResponseDto getPost(Long postId) {
+        Post findPost = boardRepository.findById(postId).
+                orElseThrow(() -> new Custom404Exception("게시글 없음"));
+
+        if (findPost.isDeleted()) {
+            throw new CustomException("삭제된 게시글");
+        }
+
+        return PostResponseDto.of(findPost);
     }
 }

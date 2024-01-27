@@ -38,7 +38,16 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
                 .build();
     }
 
-    @Override //TODO Pattern 에러메시지 자연스럽게, "errorMessage"를 바로 alert창에 띄울 수 있도록 자연스럽게
+    @ExceptionHandler(Custom404Exception.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiExceptionDto exceptionHandler(final Custom404Exception e) {
+        return ApiExceptionDto.builder()
+                .status(HttpStatus.NOT_FOUND.toString())
+                .errorMessage(e.getMessage())
+                .build();
+    }
+
+    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatusCode status,
                                                                   WebRequest request) {
