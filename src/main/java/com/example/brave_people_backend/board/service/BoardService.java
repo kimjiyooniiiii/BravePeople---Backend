@@ -89,11 +89,15 @@ public class BoardService {
     public void updatePost(Long postId, PostRequestDto postRequestDto) {
         //pathvariable에서 받은 postId로 post 객체 검색
         Post findPost = boardRepository.findPostById(postId)
-                .orElseThrow(() -> new CustomException("존재하지 않는 게시글"));
+                .orElseThrow(() -> new CustomException(String.valueOf(postId), "존재하지 않는 게시글"));
 
         //현재 Post의 작성자와 다르면
         if (!findPost.getMember().getMemberId().equals(SecurityUtil.getCurrentId())) {
-            throw new CustomException("권한 없음");
+            throw new CustomException(String.valueOf(postId), "권한 없음");
+        }
+
+        if (findPost.isDisabled() || findPost.isDeleted()) {
+            throw new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글");
         }
 
         findPost.updatePost(postRequestDto);
@@ -104,15 +108,15 @@ public class BoardService {
 
         //pathvariable에서 받은 postId로 post 객체 검색
         Post findPost = boardRepository.findPostById(postId)
-                .orElseThrow(() -> new Custom404Exception("존재하지 않는 게시글"));
+                .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
 
         //현재 Post의 작성자와 다르면
         if (!findPost.getMember().getMemberId().equals(SecurityUtil.getCurrentId())) {
-            throw new CustomException("권한 없음");
+            throw new CustomException(String.valueOf(postId), "권한 없음");
         }
 
         if (findPost.isDeleted()) {
-            throw new Custom404Exception("존재하지 않는 게시글");
+            throw new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글");
         }
 
         findPost.onDeleted();
