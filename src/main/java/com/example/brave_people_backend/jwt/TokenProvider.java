@@ -75,6 +75,7 @@ public class TokenProvider {
         Claims claims = parseClaims(accessToken);
 
         if(claims.get(AUTHORITIES_KEY) == null){
+            log.error("권한 정보가 없는 토큰입니다.");
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
@@ -96,19 +97,19 @@ public class TokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         }catch(io.jsonwebtoken.security.SecurityException e) {
-            log.info("Invalid JWT signature.");
+            log.error("Invalid JWT signature.");
             throw new JwtException("잘못된 JWT 서명.");
         } catch (MalformedJwtException e) {
-            log.info("Invalid JWT token.");
+            log.error("Invalid JWT token.");
             throw new JwtException("유효하지 않은 JWT 토큰");
         }catch (ExpiredJwtException e) {
-            log.info("Invalid JWT token.");
+            log.error("Invalid JWT token.");
             throw new JwtException("토큰 기한 만료");
         }catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT token.");
+            log.error("Unsupported JWT token.");
             throw new JwtException("지원되지 않는 JWT 토큰");
         }catch (IllegalArgumentException e) {
-            log.info("JWT token compact of handler are invalid.");
+            log.error("JWT token compact of handler are invalid.");
             throw new JwtException("토큰 handler 문제");
         }
     }

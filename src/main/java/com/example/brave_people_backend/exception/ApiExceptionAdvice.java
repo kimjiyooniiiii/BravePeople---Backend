@@ -1,6 +1,7 @@
 package com.example.brave_people_backend.exception;
 
 import com.example.brave_people_backend.exception.dto.ApiExceptionDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 // 예외를 처리하는 class
 @RestControllerAdvice
+@Slf4j
 public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
 
     // 아이디, 비밀번호 불일치 시 발생하는 예외
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiExceptionDto exceptionHandler(final BadCredentialsException e) {
+        log.error(e.getMessage());
         return ApiExceptionDto.builder()
                 .status(HttpStatus.UNAUTHORIZED.toString())
                 .errorMessage("아이디, 비밀번호를 확인해주세요.")
@@ -32,6 +35,7 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(CustomException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiExceptionDto exceptionHandler(final CustomException e) {
+        log.error("[Object : " + e.getObject() + "], [Message : "  + e.getMessage()+"]");
         return ApiExceptionDto.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .errorMessage(e.getMessage())
@@ -56,6 +60,7 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .errorMessage("Invalid request content.")
                 .build();
+        log.error(ex.getMessage());
 
         return new ResponseEntity<>(apiExceptionDto, HttpStatus.BAD_REQUEST);
     }
@@ -64,6 +69,8 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(JwtException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ApiExceptionDto exceptionHandler(final JwtException e) {
+        log.error("Refresh Token 만료");
+
         return ApiExceptionDto.builder()
                 .status(HttpStatus.UNAUTHORIZED.toString())
                 .errorMessage("Refresh Token 만료")

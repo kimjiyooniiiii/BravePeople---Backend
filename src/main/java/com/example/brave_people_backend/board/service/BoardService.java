@@ -28,6 +28,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
 
+    // 글 목록 불러오기
     @Transactional
     public PostListResponseDto getPostList(String type, Integer distance, Integer page, Integer amount) {
 

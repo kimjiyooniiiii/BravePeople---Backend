@@ -5,6 +5,7 @@ import com.example.brave_people_backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -52,7 +53,8 @@ public class SecurityConfig {
 
                 // URL 접근 권한 설정
                 .authorizeHttpRequests((a) -> a
-                        .requestMatchers("/","/auth/**", "/member/pw", "/posts").permitAll()    // 로그인, 회원가입은 접근 허용
+                        .requestMatchers(HttpMethod.GET, "/posts").permitAll()
+                        .requestMatchers("/","/auth/**", "/member/pw").permitAll()    // 로그인, 회원가입은 접근 허용
                         .anyRequest().authenticated()                       // 나머지 페이지는 인증시 허용
                 )
 

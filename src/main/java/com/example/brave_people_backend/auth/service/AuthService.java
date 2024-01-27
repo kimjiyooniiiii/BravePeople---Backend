@@ -11,6 +11,7 @@ import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
@@ -124,7 +126,7 @@ public class AuthService {
         return tokenDto;
     }
 
-    // 이메일로 Member 찾기
+    // 이메일로 Member 아이디 찾기
     @Transactional
     public UsernameResponseDto findByEmail(String email) {
         Member findMember = memberRepository.findByEmail(email)
@@ -182,6 +184,7 @@ public class AuthService {
         }
     }
 
+    // 비밀번호 찾기
     @Transactional
     public void findPasswordAndSendMail(String username, String email) {
         // 1. 아이디 체크

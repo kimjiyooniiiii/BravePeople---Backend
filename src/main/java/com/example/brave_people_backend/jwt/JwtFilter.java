@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -37,7 +39,8 @@ public class JwtFilter extends OncePerRequestFilter {
                             .orElseThrow(() -> new CustomException("존재하지 않는 멤버ID"));
 
             if(member.getRefreshToken() == null) {
-                throw new InsufficientAuthenticationException("잘못된 인증입니다.");
+                log.error("잘못된 인증 -> 이미 로그아웃한 사용자");
+                throw new InsufficientAuthenticationException("잘못된 인증 -> 이미 로그아웃한 사용자");
             }else{
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

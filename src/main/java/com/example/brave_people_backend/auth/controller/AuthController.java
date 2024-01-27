@@ -33,7 +33,7 @@ public class AuthController {
         return authService.reissue(tokenRequestDto);
     }
 
-    //이메일로 회원 찾기
+    //이메일로 회원 아이디 찾기
     @GetMapping("/username")
     public UsernameResponseDto email(@RequestParam("email") String email) {
         return authService.findByEmail(email);

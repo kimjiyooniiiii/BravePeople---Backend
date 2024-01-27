@@ -3,6 +3,7 @@ package com.example.brave_people_backend.security;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -27,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return memberRepository.findByUsername(username)
                 .map(this::createUserDetails)
-                .orElseThrow(() -> new UsernameNotFoundException(username + " -> DB에서 찾을 수 없습니다."));
+                .orElseThrow(() -> new BadCredentialsException(username + " -> DB에서 찾을 수 없습니다."));
     }
 
     // UserDetails를 만들어 반환

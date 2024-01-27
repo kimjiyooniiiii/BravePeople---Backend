@@ -48,7 +48,7 @@ public class MemberService {
         PageRequest pageRequest = PageRequest.of(0, 5, sort); //출력할 page와 amount 및 sort 기준 설정 (pageable 구현체)
 
         return ProfileResponseDto.of(memberRepository.findById(memberId).orElseThrow(
-                () -> new CustomException("존재하지 않는 멤버ID")),
+                () -> new CustomException(String.valueOf(memberId), "존재하지 않는 멤버ID")),
                 boardRepository.findPostListByProfilePage(memberId, pageRequest).map(PostListVo::of).toList()
         );
     }
@@ -86,7 +86,7 @@ public class MemberService {
         }
     }
 
-    //비밀번호 찾기
+    //비밀번호 재설정
     @Transactional
     public void updatePassword(UpdatePwRequestDto updatePwRequestDto) {
 
