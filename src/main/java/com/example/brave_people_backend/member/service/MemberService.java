@@ -1,13 +1,17 @@
 package com.example.brave_people_backend.member.service;
 
+import com.example.brave_people_backend.board.dto.PostListVo;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.member.dto.*;
+import com.example.brave_people_backend.repository.BoardRepository;
 import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +23,7 @@ import java.math.BigDecimal;
 @Transactional(readOnly = true)
 public class MemberService {
 
+    private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final EmailRepository emailRepository;
     private final PasswordEncoder passwordEncoder;
@@ -39,8 +44,12 @@ public class MemberService {
 
     // 프로필 페이지
     public ProfileResponseDto getProfileInfo(Long memberId) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "postId"); //POST 테이블의 post_id 기준 내림차순 정렬 설정
+        PageRequest pageRequest = PageRequest.of(0, 5, sort); //출력할 page와 amount 및 sort 기준 설정 (pageable 구현체)
+
         return ProfileResponseDto.of(memberRepository.findById(memberId).orElseThrow(
-                () -> new CustomException("존재하지 않는 멤버ID"))
+                () -> new CustomException("존재하지 않는 멤버ID")),
+                boardRepository.findPostListByProfilePage(memberId, pageRequest).map(PostListVo::of).toList()
         );
     }
 
@@ -78,7 +87,6 @@ public class MemberService {
     }
 
     //비밀번호 찾기
-    // TODO 비밀번호 업데이트시 로그아웃 처리해야 함
     @Transactional
     public void updatePassword(UpdatePwRequestDto updatePwRequestDto) {
 

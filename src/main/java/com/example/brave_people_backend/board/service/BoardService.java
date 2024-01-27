@@ -80,7 +80,7 @@ public class BoardService {
                 orElseThrow(() -> new Custom404Exception("게시글 없음"));
 
         if (findPost.isDeleted()) {
-            throw new CustomException("삭제된 게시글");
+            throw new Custom404Exception("삭제된 게시글");
         }
 
         return PostResponseDto.of(findPost);

@@ -2,18 +2,14 @@ package com.example.brave_people_backend.board.dto;
 
 import com.example.brave_people_backend.board.ChronoUtil;
 import com.example.brave_people_backend.entity.Post;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * 게시물 리스트 반환 형식을 따르는 VO
  */
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class PostListVo {
 
     private String type;

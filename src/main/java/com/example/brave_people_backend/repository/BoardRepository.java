@@ -20,11 +20,14 @@ public interface BoardRepository extends JpaRepository<Post, Long> {
             "(6371 * acos(cos(radians(:lat)) * cos(radians(p.lat)) * cos(radians(p.lng) - radians(:lng)) + " +
             "sin(radians(:lat)) * sin(radians(p.lat)))) <= :distance")
     Slice<Post> findPostListByRadius(@Param("act") Act act,
-                                @Param("distance") int distance,
-                                @Param("lat") BigDecimal lat,
-                                @Param("lng") BigDecimal lng,
+                                     @Param("distance") int distance,
+                                     @Param("lat") BigDecimal lat,
+                                     @Param("lng") BigDecimal lng,
                                 Pageable pageable);
 
     @Query("select p from Post p where p.act = :act and p.isDeleted = false and p.isDisabled = false")
     Slice<Post> findPostList(@Param("act") Act act, Pageable pageable);
+
+    @Query("select p from Post p join fetch p.member where p.member.memberId = :memberId and p.isDeleted = false")
+    Slice<Post> findPostListByProfilePage(@Param("memberId") Long memberId, Pageable pageable);
 }

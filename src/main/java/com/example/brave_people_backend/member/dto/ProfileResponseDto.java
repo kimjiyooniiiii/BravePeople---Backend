@@ -1,16 +1,15 @@
 package com.example.brave_people_backend.member.dto;
 
+import com.example.brave_people_backend.board.dto.PostListVo;
 import com.example.brave_people_backend.entity.Member;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ProfileResponseDto {
 
     private String username;
@@ -21,8 +20,9 @@ public class ProfileResponseDto {
     private int medalCount;
     private String profileImage;
     private Long memberId;
+    private List<PostListVo> postListVo;
 
-    public static ProfileResponseDto of(Member member) {
+    public static ProfileResponseDto of(Member member, List<PostListVo> postListVo) {
         return ProfileResponseDto.builder()
                 .username(member.getUsername())
                 .nickname(member.getNickname())
@@ -32,6 +32,7 @@ public class ProfileResponseDto {
                 .medalCount(28)
                 .profileImage(member.getProfileImg())
                 .memberId(member.getMemberId())
+                .postListVo(postListVo)
                 .build();
     }
 
