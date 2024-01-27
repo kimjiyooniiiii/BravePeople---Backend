@@ -43,7 +43,7 @@ public class ApiExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(Custom404Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiExceptionDto exceptionHandler(final Custom404Exception e) {
         return ApiExceptionDto.builder()
                 .status(HttpStatus.NOT_FOUND.toString())

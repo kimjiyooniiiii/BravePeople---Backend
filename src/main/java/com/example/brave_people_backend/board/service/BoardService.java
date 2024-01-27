@@ -78,10 +78,10 @@ public class BoardService {
     @Transactional
     public PostResponseDto getPost(Long postId) {
         Post findPost = boardRepository.findById(postId).
-                orElseThrow(() -> new Custom404Exception("게시글 없음"));
+                orElseThrow(() -> new Custom404Exception("존재하지 않는 게시글"));
 
         if (findPost.isDeleted()) {
-            throw new Custom404Exception("삭제된 게시글");
+            throw new Custom404Exception("존재하지 않는 게시글");
         }
 
         return PostResponseDto.of(findPost);
