@@ -20,6 +20,7 @@ public class PostResponseDto {
     private String nickname;
     private String lat;
     private String lng;
+    private double score;
     private boolean isDisabled;
     private Long memberId;
     private Long postId;
@@ -37,6 +38,7 @@ public class PostResponseDto {
                 .nickname(post.getMember().getNickname())
                 .lat(post.getLat().toString())
                 .lng(post.getLng().toString())
+                .score(4.5)
                 .isDisabled(post.isDisabled())
                 .memberId(post.getMember().getMemberId())
                 .postId(post.getPostId())
