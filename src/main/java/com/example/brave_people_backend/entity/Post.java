@@ -74,7 +74,7 @@ public class Post {
         this.title = postRequestDto.getTitle();
         this.contents = postRequestDto.getContents();
         this.price = DecimalUtil.stringToIntPrice(postRequestDto.getPrice());
-        this.url = postRequestDto.getImg();
+        this.url = postRequestDto.getPostImg();
     }
 
     public void onDeleted() {

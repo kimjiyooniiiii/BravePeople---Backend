@@ -28,7 +28,7 @@ public class PostRequestDto {
     private String contents;
 
     @Size(min = 1, max = 7)
-    @Pattern(regexp = "^\\d{1,3}(,\\d{3})*$")
+    @Pattern(regexp = "^(-1|\\d{1,3}(,\\d{3})*$)")
     private String price;
 
     @Pattern(regexp = "^(벌레|전화|환불|기타)$")
