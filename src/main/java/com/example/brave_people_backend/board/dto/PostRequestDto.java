@@ -34,7 +34,7 @@ public class PostRequestDto {
     @Pattern(regexp = "^(벌레|전화|환불|기타)$")
     private String category;
 
-    private String img;
+    private String postImg;
 
     //Post 객체 생성
     public Post toPost(Member member) {
@@ -47,7 +47,7 @@ public class PostRequestDto {
                 .lat(member.getLat())
                 .lng(member.getLng())
                 .act(Act.valueOf(type))
-                .url(img)
+                .url(postImg)
                 .build();
     }
 }
