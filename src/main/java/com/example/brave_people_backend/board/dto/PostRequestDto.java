@@ -1,5 +1,6 @@
 package com.example.brave_people_backend.board.dto;
 
+import com.example.brave_people_backend.board.DecimalUtil;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
 import com.example.brave_people_backend.enumclass.Act;
@@ -10,7 +11,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Range;
 
 @Getter
 @NoArgsConstructor
@@ -27,8 +27,9 @@ public class PostRequestDto {
     @NotBlank @Size(max = 1000)
     private String contents;
 
-    @Range(min = -1, max = 999999)
-    private int price;
+    @Size(min = 1, max = 7)
+    @Pattern(regexp = "^\\d{1,3}(,\\d{3})*$")
+    private String price;
 
     @Pattern(regexp = "^(벌레|전화|환불|기타)$")
     private String category;
@@ -42,7 +43,7 @@ public class PostRequestDto {
                 .category(Category.valueOf(category))
                 .title(title)
                 .contents(contents)
-                .price(price)
+                .price(DecimalUtil.stringToIntPrice(price))
                 .lat(member.getLat())
                 .lng(member.getLng())
                 .act(Act.valueOf(type))

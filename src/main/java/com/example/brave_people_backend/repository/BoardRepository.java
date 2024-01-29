@@ -33,5 +33,5 @@ public interface BoardRepository extends JpaRepository<Post, Long> {
     Slice<Post> findPostListByProfilePage(@Param("memberId") Long memberId, Pageable pageable);
 
     @Query("select p from Post p where p.postId = :postId and p.isDeleted = false and p.isDisabled = false")
-    Optional<Post> findPostById(Long postId);
+    Optional<Post> findPostById(@Param("postId") Long postId);
 }

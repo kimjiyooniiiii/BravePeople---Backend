@@ -1,6 +1,7 @@
 package com.example.brave_people_backend.board.dto;
 
 import com.example.brave_people_backend.board.ChronoUtil;
+import com.example.brave_people_backend.board.DecimalUtil;
 import com.example.brave_people_backend.entity.Post;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +15,7 @@ public class PostListVo {
 
     private String type;
     private String title;
-    private int price;
+    private String price;
     private String gender;
     private String createdAt;
     private String category;
@@ -24,7 +25,7 @@ public class PostListVo {
         return PostListVo.builder()
                 .type(post.getAct().toString())
                 .title(post.getTitle())
-                .price(post.getPrice())
+                .price(DecimalUtil.intToStringPrice(post.getPrice()))
                 .gender(post.getMember().isGender() ? "여성" : "남성") //남자면 false, 여자면 true
                 .createdAt(ChronoUtil.timesAgo(post.getCreatedAt()))
                 .category(post.getCategory().toString())
