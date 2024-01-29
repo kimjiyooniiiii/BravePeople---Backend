@@ -108,9 +108,13 @@ public class AuthService {
             throw new JwtException("Refresh Token 만료");
         }
 
-        // 사용자가 직접 로그아웃을 했을 경우
+        // 사용자가 DB에 없을 경우
         Member member = memberRepository.findById(Long.parseLong(memberId))
-                .orElseThrow(() -> new CustomException(memberId, "이미 로그아웃한 사용자"));
+                .orElseThrow(() -> new CustomException(memberId, "존재하지 않는 멤버ID"));
+
+        if(member.getRefreshToken() == null) {
+            throw new InsufficientAuthenticationException("잘못된 접근 -> 이미 로그아웃한 사용자");
+        }
 
         // DB에 저장된 refreshToken과 사용자가 입력한 refreshToken 비교
         if(!member.getRefreshToken().equals(tokenRequestDto.getRefreshToken())) {

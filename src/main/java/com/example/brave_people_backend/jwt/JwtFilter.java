@@ -38,6 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
             Member member = memberRepository.findById(Long.parseLong(authentication.getName()))
                             .orElseThrow(() -> new CustomException(authentication.getName(), "존재하지 않는 멤버ID"));
 
+            // 이미 로그아웃한 사용자의 Access Token으로 접근했을 경우
             if(member.getRefreshToken() == null) {
                 log.error("잘못된 인증 -> 이미 로그아웃한 사용자");
                 throw new InsufficientAuthenticationException("잘못된 인증 -> 이미 로그아웃한 사용자");
