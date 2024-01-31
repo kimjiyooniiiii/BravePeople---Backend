@@ -13,6 +13,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -283,5 +284,11 @@ public class AuthService {
 
     public int generateAuthCode() {
         return new Random().nextInt(888888) + 111111;
+    }
+
+    // 이메일 인증 기록(EAMIL 테이블)을 매시 정각마다 모두 삭제하는 스케줄러
+    @Scheduled(cron = "0 0 0/1 * * *")
+    public void deleteAllEmailHistory() {
+        emailRepository.deleteAllInBatch();
     }
 }
