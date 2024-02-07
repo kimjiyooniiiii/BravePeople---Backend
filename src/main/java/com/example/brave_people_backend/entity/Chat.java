@@ -2,10 +2,7 @@ package com.example.brave_people_backend.entity;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
 @Builder
 @Document(collection = "chat")
 @NoArgsConstructor

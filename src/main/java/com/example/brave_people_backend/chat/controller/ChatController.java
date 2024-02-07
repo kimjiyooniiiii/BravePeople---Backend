@@ -1,6 +1,6 @@
 package com.example.brave_people_backend.chat.controller;
 
-import com.example.brave_people_backend.chat.repository.ChatRepository;
+import com.example.brave_people_backend.repository.ChatRepository;
 import com.example.brave_people_backend.entity.Chat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

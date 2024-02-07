@@ -28,9 +28,13 @@ public class ChatRoom {
     @JoinColumn(name = "b_member_id", nullable = false, updatable = false)
     private Member memberB;
 
-    @ColumnDefault("false")
+    @ColumnDefault("true")
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean isPartIn; //참여 여부 (?)
+    private boolean aIsPartIn;
+
+    @ColumnDefault("true")
+    @Column(columnDefinition = "TINYINT(1)", nullable = false)
+    private boolean bIsPartIn;
 
     @CreatedDate
     @Column(columnDefinition = "timestamp", nullable = false, updatable = false)

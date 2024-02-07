@@ -1,6 +1,6 @@
 package com.example.brave_people_backend;
 
-import com.example.brave_people_backend.chat.repository.ChatRepository;
+import com.example.brave_people_backend.repository.ChatRepository;
 import com.example.brave_people_backend.entity.Chat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
