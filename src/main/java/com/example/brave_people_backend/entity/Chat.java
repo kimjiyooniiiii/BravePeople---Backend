@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class Chat {
     @Id
-    @Field(value = "_id", targetType = FieldType.OBJECT_ID)
+    @Field(value = "_id", targetType = FieldType.STRING)
     private String id;
 
     @Field("room_id")

@@ -1,28 +1,26 @@
 package com.example.brave_people_backend.chat.controller;
 
-import com.example.brave_people_backend.repository.ChatRepository;
-import com.example.brave_people_backend.entity.Chat;
+import com.example.brave_people_backend.chat.dto.ChatRequestDto;
+import com.example.brave_people_backend.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
 @RestController
 @RequiredArgsConstructor
 public class ChatController {
 
-    private final ChatRepository chatRepository;
+    private final ChatService chatService;
 
-    @GetMapping("/chat")
-    public void testChat() {
-        System.out.println("testChat()");
-        Chat chat = Chat.builder()
-                .roomId(2L)
-                .senderId(3L)
-                .message("나의 EC2 채팅 메시지")
-                .isRead(false)
-                .url(null)
-                .build();
-
-        chatRepository.save(chat);
+    // 메시지 전송
+    @MessageMapping("/{roomId}")
+    public void sendMessage(@Payload ChatRequestDto chatRequestDto, @DestinationVariable("roomId") Long roomId) {
+        chatService.sendMessage(chatRequestDto, roomId);
     }
+
 }
