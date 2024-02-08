@@ -1,5 +1,6 @@
 package com.example.brave_people_backend.board.controller;
 
+import com.example.brave_people_backend.board.dto.ContactResponseDto;
 import com.example.brave_people_backend.board.dto.PostRequestDto;
 import com.example.brave_people_backend.board.dto.PostListResponseDto;
 import com.example.brave_people_backend.board.dto.PostResponseDto;
@@ -49,6 +50,12 @@ public class BoardController {
     @DeleteMapping("/{postId}")
     public void deletePost(@PathVariable("postId") Long postId) {
         boardService.deletePost(postId);
+    }
+
+    //의뢰 만들기
+    @GetMapping("/{postId}/request")
+    public ContactResponseDto makeContact (@PathVariable("postId") Long postId) {
+        return boardService.makeContact(postId);
     }
 
 }

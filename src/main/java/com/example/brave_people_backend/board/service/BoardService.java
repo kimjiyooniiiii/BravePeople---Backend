@@ -1,12 +1,17 @@
 package com.example.brave_people_backend.board.service;
 
 import com.example.brave_people_backend.board.dto.*;
+import com.example.brave_people_backend.chat.service.ChatRoomService;
+import com.example.brave_people_backend.entity.Contact;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
 import com.example.brave_people_backend.enumclass.Act;
+import com.example.brave_people_backend.enumclass.ContactStatus;
 import com.example.brave_people_backend.exception.Custom404Exception;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.BoardRepository;
+import com.example.brave_people_backend.repository.ChatRoomRepository;
+import com.example.brave_people_backend.repository.ContactRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +30,9 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final ChatRoomService chatRoomService;
+    private final ContactRepository contactRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     // 글 목록 불러오기
     @Transactional(readOnly = true)
@@ -120,5 +128,58 @@ public class BoardService {
         }
 
         findPost.onDeleted();
+    }
+
+    //의뢰 만들기
+    public ContactResponseDto makeContact(Long postId) {
+        Member helper = new Member();
+        Member client = new Member();
+        Long currentId = SecurityUtil.getCurrentId();
+
+        //postId로 현재 post를 찾음
+        Post currentPost = boardRepository.findPostById(postId)
+                .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
+
+        Act currentAct = currentPost.getAct();
+        //현재 post의 Act가 "원정대"이면 -> "원정대" 게시글이면
+        if(currentAct.equals(Act.원정대)) {
+            //현재 post의 member은 helper이고, 토큰에서 찾은 member은 client가 됨
+            helper = currentPost.getMember();
+            client = memberRepository.findById(currentId)
+                    .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
+        }
+        //현재 post의 Act가 "의뢰인"이면 -> "의뢰인" 게시글이면
+        else if(currentAct.equals(Act.의뢰인)) {
+            //현재 post의 member은 client이고, 토큰에서 찾은 member은 helper가 됨
+            client = currentPost.getMember();
+            helper = memberRepository.findById(currentId)
+                    .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
+        }
+
+        //본인과의 채팅방이 개설되지 않게 함
+        if(client.getMemberId().equals(helper.getMemberId())) {
+            throw new CustomException(String.valueOf(postId), "본인의 게시글");
+        }
+
+        //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 있으면 roomId 반환
+        Long roomId = chatRoomRepository.findChatRoom(helper.getMemberId(), client.getMemberId());
+
+        //존재하는 채팅방이 없으면 새로운 채팅방 생성
+        if (roomId == null) {
+            Contact contact  = Contact.builder()
+                    .helper(helper)
+                    .client(client)
+                    .post(currentPost)
+                    .contactStatus(ContactStatus.대기중)
+                    .isHelperFinished(false)
+                    .isClientFinished(false)
+                    .isDeleted(false)
+                    .build();
+
+            contactRepository.save(contact);
+            //새 채팅방을 생성하여 roomId를 받음
+            roomId = chatRoomService.createChatRoom(helper, client);
+        }
+        return ContactResponseDto.of(roomId);
     }
 }
