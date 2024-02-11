@@ -1,11 +1,13 @@
 package com.example.brave_people_backend.auth.service;
 
 import com.example.brave_people_backend.auth.dto.*;
+import com.example.brave_people_backend.entity.Chat;
 import com.example.brave_people_backend.entity.ChatRoom;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.jwt.TokenProvider;
+import com.example.brave_people_backend.repository.ChatRepository;
 import com.example.brave_people_backend.repository.ChatRoomRepository;
 import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
@@ -40,6 +42,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final JavaMailSender javaMailSender;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRepository chatRepository;
 
     // 회원가입 service
     @Transactional
@@ -95,7 +98,12 @@ public class AuthService {
         // 내가 참여중인 채팅방 리스트
         List<Long> chatRooms = chatRoomRepository.findChatRoomByMemberId(Long.parseLong(authenticate.getName()));
 
-        return LoginResponseDto.of(member, chatRooms, tokenDto);
+        // 읽지 않은 메시지 가져오기
+        List<Chat> isNotReadChat = chatRepository.findChatByReadIs(chatRooms);
+
+        boolean isRead = (isNotReadChat.isEmpty()) ? true : false;
+
+        return LoginResponseDto.of(member, chatRooms, tokenDto, isRead);
     }
 
     // refresh token으로 access token 재발급 받기
