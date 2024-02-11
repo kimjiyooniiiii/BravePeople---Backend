@@ -1,10 +1,12 @@
 package com.example.brave_people_backend.auth.service;
 
 import com.example.brave_people_backend.auth.dto.*;
+import com.example.brave_people_backend.entity.ChatRoom;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.jwt.TokenProvider;
+import com.example.brave_people_backend.repository.ChatRoomRepository;
 import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
 import io.jsonwebtoken.JwtException;
@@ -22,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -36,6 +39,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final JavaMailSender javaMailSender;
+    private final ChatRoomRepository chatRoomRepository;
 
     // 회원가입 service
     @Transactional
@@ -88,14 +92,10 @@ public class AuthService {
         // 회원 DB의 Refresh Token 업데이트
         member.changeRefreshToken(tokenDto.getRefreshToken());
 
-        return LoginResponseDto.builder()
-                .memberId(authenticate.getName())
-                .nickname(member.getNickname())
-                .lat(String.valueOf(member.getLat()))
-                .lng(String.valueOf(member.getLng()))
-                .profileImg(member.getProfileImg())
-                .tokenDto(tokenDto)
-                .build();
+        // 내가 참여중인 채팅방 리스트
+        List<Long> chatRooms = chatRoomRepository.findChatRoomByMemberId(Long.parseLong(authenticate.getName()));
+
+        return LoginResponseDto.of(member, chatRooms, tokenDto);
     }
 
     // refresh token으로 access token 재발급 받기

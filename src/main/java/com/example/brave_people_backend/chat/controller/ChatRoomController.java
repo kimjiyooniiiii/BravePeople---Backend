@@ -15,6 +15,7 @@ import java.util.List;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
+    // 채팅방 리스트 불러오기
     @GetMapping
     public List<ChatRoomResponseVo> getChatRoomList() {
         return chatRoomService.getChatRoomList();

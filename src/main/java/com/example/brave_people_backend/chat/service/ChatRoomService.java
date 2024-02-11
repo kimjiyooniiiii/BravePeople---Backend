@@ -26,6 +26,7 @@ public class ChatRoomService {
     private final MemberRepository memberRepository;
     private final ChatRepository chatRepository;
 
+    // 달려가기, 부탁하기 -> 채팅방 생성
     public ChatRoom createChatRoom(Member memberA, Member memberB) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .memberA(memberA)
@@ -37,6 +38,7 @@ public class ChatRoomService {
         return chatRoomRepository.save(chatRoom);
     }
 
+    // 채팅방 리스트 불러오기
     public List<ChatRoomResponseVo> getChatRoomList() {
         Long currentId = SecurityUtil.getCurrentId();
         Member me = memberRepository.findById(currentId)
