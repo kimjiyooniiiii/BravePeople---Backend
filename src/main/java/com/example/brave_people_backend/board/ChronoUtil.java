@@ -2,6 +2,7 @@ package com.example.brave_people_backend.board;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 
 //LocalDateTime -> 몇분 전, 몇시간 전, 며칠 전으로 출력하는 Util
@@ -19,6 +20,18 @@ public class ChronoUtil {
             word = (gap/60/24) + "일 전";
         } else {
             word = dayBefore.format(DateTimeFormatter.ofPattern("MM월 dd일"));
+        }
+        return word;
+    }
+
+    public static String formatDateTime(LocalDateTime dateTime) {
+        LocalDateTime now = LocalDateTime.now();
+        String word;
+
+        if (dateTime.toLocalDate().equals(now.toLocalDate())) { //당일이면 오후 2:30
+            word = dateTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
+        } else { //당일이 아니면 2월 11일
+            word = dateTime.format(DateTimeFormatter.ofPattern("MM월 dd일"));
         }
         return word;
     }

@@ -43,4 +43,8 @@ public class Contact {
     @ColumnDefault("false")
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     private boolean isDeleted;
+
+    /*@LastModifiedBy
+    @Column(columnDefinition = "timestamp", nullable = false)
+    private LocalDateTime modifiedAt;*/
 }

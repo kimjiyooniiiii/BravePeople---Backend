@@ -2,6 +2,7 @@ package com.example.brave_people_backend.board.service;
 
 import com.example.brave_people_backend.board.dto.*;
 import com.example.brave_people_backend.chat.service.ChatRoomService;
+import com.example.brave_people_backend.entity.ChatRoom;
 import com.example.brave_people_backend.entity.Contact;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
@@ -131,55 +132,54 @@ public class BoardService {
     }
 
     //의뢰 만들기
+    //TODO 이미 진행중인 의뢰가 있을 시 의뢰 만들지 못하게 해야 함
+    //TODO 같은 게시글에 두번 의뢰 가능한가? 불가능하게 막아야 함
     public ContactResponseDto makeContact(Long postId) {
-        Member helper = new Member();
-        Member client = new Member();
+        //로그인한 멤버 관련 데이터 초기화
         Long currentId = SecurityUtil.getCurrentId();
+        Member currentMember = memberRepository.findById(currentId)
+                .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
 
-        //postId로 현재 post를 찾음
+        //게시글 관련 데이터 초기화
         Post currentPost = boardRepository.findPostById(postId)
                 .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
-
         Act currentAct = currentPost.getAct();
-        //현재 post의 Act가 "원정대"이면 -> "원정대" 게시글이면
-        if(currentAct.equals(Act.원정대)) {
-            //현재 post의 member은 helper이고, 토큰에서 찾은 member은 client가 됨
-            helper = currentPost.getMember();
-            client = memberRepository.findById(currentId)
-                    .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
-        }
-        //현재 post의 Act가 "의뢰인"이면 -> "의뢰인" 게시글이면
-        else if(currentAct.equals(Act.의뢰인)) {
-            //현재 post의 member은 client이고, 토큰에서 찾은 member은 helper가 됨
-            client = currentPost.getMember();
-            helper = memberRepository.findById(currentId)
-                    .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
-        }
+        Member postMember = currentPost.getMember();
 
         //본인과의 채팅방이 개설되지 않게 함
-        if(client.getMemberId().equals(helper.getMemberId())) {
+        if(postMember == currentMember) {
             throw new CustomException(String.valueOf(postId), "본인의 게시글");
         }
 
-        //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 있으면 roomId 반환
-        Long roomId = chatRoomRepository.findChatRoom(helper.getMemberId(), client.getMemberId());
+        Member helper, client;
+        if(Act.원정대 == currentAct) {
+            helper = postMember;
+            client = currentMember;
+        } else {
+            helper = currentMember;
+            client = postMember;
+        }
 
         //존재하는 채팅방이 없으면 새로운 채팅방 생성
-        if (roomId == null) {
-            Contact contact  = Contact.builder()
-                    .helper(helper)
-                    .client(client)
-                    .post(currentPost)
-                    .contactStatus(ContactStatus.대기중)
-                    .isHelperFinished(false)
-                    .isClientFinished(false)
-                    .isDeleted(false)
-                    .build();
+        Contact contact  = Contact.builder()
+                .helper(helper)
+                .client(client)
+                .post(currentPost)
+                .contactStatus(ContactStatus.대기중)
+                .isHelperFinished(false)
+                .isClientFinished(false)
+                .isDeleted(false)
+                .build();
 
-            contactRepository.save(contact);
-            //새 채팅방을 생성하여 roomId를 받음
-            roomId = chatRoomService.createChatRoom(helper, client);
-        }
-        return ContactResponseDto.of(roomId);
+        contactRepository.save(contact);
+
+        // TODO 현재 chatRoomRepository와 chatRoomService 모두 의존하고 있으므로 하나만 의존하도록 변경해야 함
+        //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 있으면 roomId 반환
+        ChatRoom chatRoom = chatRoomRepository.findChatRoom(helper, client)
+                .orElse(chatRoomService.createChatRoom(helper, client));
+        chatRoom.changeContact(contact);
+
+
+        return ContactResponseDto.of(chatRoom.getChatRoomId());
     }
 }

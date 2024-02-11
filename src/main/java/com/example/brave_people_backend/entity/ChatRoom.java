@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "chat_room")
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +28,10 @@ public class ChatRoom {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "b_member_id", nullable = false, updatable = false)
     private Member memberB;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contact_id")
+    private Contact contact;
 
     @ColumnDefault("true")
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
@@ -43,4 +48,8 @@ public class ChatRoom {
     @CreatedDate
     @Column(columnDefinition = "timestamp", nullable = false, updatable = false)
     private LocalDateTime bEnteredAt;
+
+    public void changeContact(Contact contact) {
+        this.contact = contact;
+    }
 }
