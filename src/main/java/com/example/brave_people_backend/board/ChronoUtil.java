@@ -27,6 +27,9 @@ public class ChronoUtil {
     public static String formatDateTime(LocalDateTime dateTime) {
         LocalDateTime now = LocalDateTime.now();
         String word;
+        if (dateTime == null) {
+            return null;
+        }
 
         if (dateTime.toLocalDate().equals(now.toLocalDate())) { //당일이면 오후 2:30
             word = dateTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));

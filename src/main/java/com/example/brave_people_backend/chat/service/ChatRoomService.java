@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class ChatRoomService {
                             .senderId(other.getMemberId())
                             .roomId(chatRoom.getChatRoomId())
                             .isRead(false)
-                            .sendAt(LocalDateTime.now())
+                            .sendAt(null)
                             .message("최근 채팅 없음")
                             .url(null)
                             .build()
