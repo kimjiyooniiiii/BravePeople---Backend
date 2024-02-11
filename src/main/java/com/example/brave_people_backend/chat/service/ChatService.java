@@ -1,7 +1,7 @@
 package com.example.brave_people_backend.chat.service;
 
-import com.example.brave_people_backend.chat.dto.ChatRequestDto;
-import com.example.brave_people_backend.chat.dto.ChatResponseDto;
+import com.example.brave_people_backend.chat.dto.SendRequestDto;
+import com.example.brave_people_backend.chat.dto.SendResponseDto;
 import com.example.brave_people_backend.entity.Chat;
 import com.example.brave_people_backend.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,16 +18,16 @@ public class ChatService {
     private final ChatRepository chatRepository;
 
     // 메시지 전송
-    public void sendMessage(ChatRequestDto chatRequestDto, Long roomId) {
+    public void sendMessage(SendRequestDto sendRequestDto, Long roomId) {
         Chat chat = Chat.builder()
                 .id(UUID.randomUUID().toString())
                 .roomId(roomId)
-                .senderId(chatRequestDto.getSenderId())
-                .message(chatRequestDto.getMessage())
-                .url(chatRequestDto.getImg())
+                .senderId(sendRequestDto.getSenderId())
+                .message(sendRequestDto.getMessage())
+                .url(sendRequestDto.getImg())
                 .isRead(false)
                 .build();
 
-        template.convertAndSend("/sub/" + roomId, ChatResponseDto.of(chatRepository.save(chat)));
+        template.convertAndSend("/sub/" + roomId, SendResponseDto.of(chatRepository.save(chat)));
     }
 }

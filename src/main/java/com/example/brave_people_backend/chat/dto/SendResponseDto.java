@@ -1,17 +1,15 @@
 package com.example.brave_people_backend.chat.dto;
 
 import com.example.brave_people_backend.entity.Chat;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
 @Getter
 @Builder
-public class ChatResponseDto {
+public class SendResponseDto {
 
     private String chatId;
     private Long senderId;
@@ -20,8 +18,8 @@ public class ChatResponseDto {
     private String time;
     private String img;
 
-    public static ChatResponseDto of(Chat chat) {
-        return ChatResponseDto.builder()
+    public static SendResponseDto of(Chat chat) {
+        return SendResponseDto.builder()
                 .chatId(chat.getId())
                 .senderId(chat.getSenderId())
                 .message(chat.getMessage())
