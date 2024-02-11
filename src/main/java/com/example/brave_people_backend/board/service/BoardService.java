@@ -133,7 +133,7 @@ public class BoardService {
 
     //의뢰 만들기
     //TODO 이미 진행중인 의뢰가 있을 시 의뢰 만들지 못하게 해야 함
-    //TODO 같은 게시글에 두번 의뢰 가능한가? 불가능하게 막아야 함
+    //TODO 같은 게시글에 같은 사람이 두번 의뢰 가능한가? 불가능하게 막아야 함
     public ContactResponseDto makeContact(Long postId) {
         //로그인한 멤버 관련 데이터 초기화
         Long currentId = SecurityUtil.getCurrentId();
@@ -151,6 +151,7 @@ public class BoardService {
             throw new CustomException(String.valueOf(postId), "본인의 게시글");
         }
 
+        //Act에 따른 helper, client 초기화
         Member helper, client;
         if(Act.원정대 == currentAct) {
             helper = postMember;

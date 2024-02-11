@@ -1,6 +1,8 @@
 package com.example.brave_people_backend.chat.service;
 
+import com.example.brave_people_backend.chat.dto.ChatResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
+import com.example.brave_people_backend.chat.dto.SendResponseDto;
 import com.example.brave_people_backend.entity.Chat;
 import com.example.brave_people_backend.entity.ChatRoom;
 import com.example.brave_people_backend.entity.Member;
@@ -38,18 +40,27 @@ public class ChatRoomService {
         return chatRoomRepository.save(chatRoom);
     }
 
+    // TODO 참여중인 채팅방만 불러오도록 추가해야 함
     // 채팅방 리스트 불러오기
     public List<ChatRoomResponseVo> getChatRoomList() {
+        // 멤버(나) 초기화
         Long currentId = SecurityUtil.getCurrentId();
         Member me = memberRepository.findById(currentId)
                 .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
+        // 내가 참여한 채팅방 리스트 초기화
         List<ChatRoom> chatRoomList = chatRoomRepository.getChatRoomList(me);
+        // 결과값으로 반환할 List<ChatRoomResponseVo> 초기화
         List<ChatRoomResponseVo> result = new ArrayList<>();
 
-        PageRequest pageRequest = PageRequest.of(0, 1); //출력할 page와 amount 및 sort 기준 설정 (pageable 구현체)
+        // lastChat은 딱 하나 가져오는 것이므로 pageable 구현 객체 초기화
+        PageRequest pageRequest = PageRequest.of(0, 1); //출력할 page와 amount (pageable 구현체)
+        // 내가 참여한 채팅방 iter 순회
         for (ChatRoom chatRoom : chatRoomList) {
+            // 멤버(상대방) 초기화
             Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
+            // 마지막 채팅을 List<Chat> 형태로 받아옴
             List<Chat> chatListOne = chatRepository.findByRoomId(chatRoom.getChatRoomId(), pageRequest);
+            // 채팅방에 채팅이 1개도 존재하지 않으면 chatListOne.isEmpty == true 이므로 임의 채팅(최근 채팅 없음) 생성
             Chat lastChat = chatListOne.isEmpty() ?
                     Chat.builder()
                             .senderId(other.getMemberId())
@@ -61,9 +72,37 @@ public class ChatRoomService {
                             .build()
                     : chatListOne.get(0);
 
+            //채팅방, 상대방, 마지막 채팅을 파라미터로 넘겨주고 result 리스트에 추가
             result.add(ChatRoomResponseVo.of(chatRoom, other, lastChat));
         }
 
         return result;
+    }
+
+    //기존 채팅내역 불러오기
+    public ChatResponseDto getChatList(Long roomId) {
+        // 멤버(나)와 채팅방 초기화
+        Long currentId = SecurityUtil.getCurrentId();
+        Member me = memberRepository.findById(currentId)
+                .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방"));
+
+        // 채팅방 참여자가 아닌 경우 예외 발생
+        if (chatRoom.getMemberA() != me && chatRoom.getMemberB() != me) {
+            throw new CustomException(String.valueOf(roomId), "채팅방 참여자가 아님");
+        }
+
+        // 멤버(상대방) 초기화
+        Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
+
+        // 최근 채팅데이터 300개를 불러와 List<Chat>에 넣고 List<SendResponseDto>로 변환
+        PageRequest pageRequest = PageRequest.of(0, 300);
+        List<SendResponseDto> messages = chatRepository.findByRoomId(roomId, pageRequest)
+                .stream()
+                .map(SendResponseDto::of)
+                .toList();
+
+        return ChatResponseDto.of(other, messages);
     }
 }
