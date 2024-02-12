@@ -132,8 +132,6 @@ public class BoardService {
     }
 
     //의뢰 만들기
-    //TODO 이미 진행중인 의뢰가 있을 시 의뢰 만들지 못하게 해야 함
-    //TODO 같은 게시글에 같은 사람이 두번 의뢰 가능한가? 불가능하게 막아야 함
     public ContactResponseDto makeContact(Long postId) {
         //로그인한 멤버 관련 데이터 초기화
         Long currentId = SecurityUtil.getCurrentId();
@@ -161,6 +159,16 @@ public class BoardService {
             client = postMember;
         }
 
+        //helper와 client 사이에 진행중인 의뢰가 있으면 오류
+        if (contactRepository.existsByContactStatusAndClientAndHelper(ContactStatus.진행중, client, helper)) {
+            throw new CustomException(client.getMemberId() + ", " + helper.getMemberId(), "진행중인 의뢰 존재");
+        }
+
+        //같은 원정대가 같은 게시글에 중복해서 달려가기 못하게 막음
+        if (currentAct == Act.의뢰인 && contactRepository.existsByClientAndHelper(client, helper)) {
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "의뢰 중복");
+        }
+
         //존재하는 채팅방이 없으면 새로운 채팅방 생성
         Contact contact  = Contact.builder()
                 .helper(helper)
@@ -175,9 +183,9 @@ public class BoardService {
         contactRepository.save(contact);
 
         // TODO 현재 chatRoomRepository와 chatRoomService 모두 의존하고 있으므로 하나만 의존하도록 변경해야 함
-        //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 있으면 roomId 반환
+        //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 없으면 생성
         ChatRoom chatRoom = chatRoomRepository.findChatRoom(helper, client)
-                .orElse(chatRoomService.createChatRoom(helper, client));
+                .orElseGet(() ->chatRoomService.createChatRoom(helper, client));
         chatRoom.changeContact(contact);
 
 
