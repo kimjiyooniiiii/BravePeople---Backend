@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface ChatRepository extends MongoRepository<Chat, String> {
-    @Query(sort = "{send_at:-1}")
+    @Query(sort = "{send_at:1}")
     List<Chat> findByRoomId(Long roomId, Pageable pageable);
 
     // 내가 참여중인 채팅방의 읽지 않은 메시지 검색
