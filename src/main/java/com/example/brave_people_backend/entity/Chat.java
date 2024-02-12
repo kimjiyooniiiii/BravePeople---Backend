@@ -40,4 +40,8 @@ public class Chat {
 
     @Field("url")
     private String url;
+
+    public void setMessageWhenImage(String message) {
+        this.message = message;
+    }
 }

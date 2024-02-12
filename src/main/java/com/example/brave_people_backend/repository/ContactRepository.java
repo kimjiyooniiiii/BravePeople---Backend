@@ -4,7 +4,6 @@ import com.example.brave_people_backend.entity.Contact;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.enumclass.ContactStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ContactRepository extends JpaRepository<Contact, Long> {

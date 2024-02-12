@@ -72,6 +72,10 @@ public class ChatRoomService {
                             .build()
                     : chatListOne.get(0);
 
+            //마지막 메시지가 사진이면 message를 "사진을 보냈습니다."로 설정
+            if (lastChat.getMessage() == null) {
+                lastChat.setMessageWhenImage("사진을 보냈습니다.");
+            }
             //채팅방, 상대방, 마지막 채팅을 파라미터로 넘겨주고 result 리스트에 추가
             result.add(ChatRoomResponseVo.of(chatRoom, other, lastChat));
         }
