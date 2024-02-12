@@ -58,4 +58,8 @@ public class AuthController {
     public void findPasswordAndSendMail(@RequestParam("username") String username, @RequestParam("email") String email) {
         authService.findPasswordAndSendMail(username, email);
     }
+
+    //AWS health check용 api
+    @GetMapping("/aws")
+    public void awsHealthCheck() {}
 }

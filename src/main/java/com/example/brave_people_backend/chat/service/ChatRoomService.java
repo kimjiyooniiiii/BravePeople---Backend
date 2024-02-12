@@ -59,7 +59,7 @@ public class ChatRoomService {
             // 멤버(상대방) 초기화
             Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
             // 마지막 채팅을 List<Chat> 형태로 받아옴
-            List<Chat> chatListOne = chatRepository.findByRoomId(chatRoom.getChatRoomId(), pageRequest);
+            List<Chat> chatListOne = chatRepository.findChatOneByRoomId(chatRoom.getChatRoomId(), pageRequest);
             // 채팅방에 채팅이 1개도 존재하지 않으면 chatListOne.isEmpty == true 이므로 임의 채팅(최근 채팅 없음) 생성
             Chat lastChat = chatListOne.isEmpty() ?
                     Chat.builder()
