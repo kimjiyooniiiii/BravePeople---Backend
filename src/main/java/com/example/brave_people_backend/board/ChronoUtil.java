@@ -2,8 +2,8 @@ package com.example.brave_people_backend.board;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 
 //LocalDateTime -> 몇분 전, 몇시간 전, 며칠 전으로 출력하는 Util
 public class ChronoUtil {
@@ -32,7 +32,7 @@ public class ChronoUtil {
         }
 
         if (dateTime.toLocalDate().equals(now.toLocalDate())) { //당일이면 오후 2:30
-            word = dateTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
+            word = dateTime.format(DateTimeFormatter.ofPattern("a h:mm").withLocale(Locale.forLanguageTag("ko")));
         } else { //당일이 아니면 2월 11일
             word = dateTime.format(DateTimeFormatter.ofPattern("MM월 dd일"));
         }

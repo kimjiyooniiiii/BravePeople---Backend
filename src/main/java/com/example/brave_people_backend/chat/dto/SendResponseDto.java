@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
+import java.util.Locale;
 
 @Getter
 @Builder
@@ -24,7 +24,7 @@ public class SendResponseDto {
                 .senderId(chat.getSenderId())
                 .message(chat.getMessage())
                 .date(chat.getSendAt().format(DateTimeFormatter.ofPattern("MM월 dd일")))
-                .time(chat.getSendAt().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+                .time(chat.getSendAt().format(DateTimeFormatter.ofPattern("a h:mm").withLocale(Locale.forLanguageTag("ko"))))
                 .img(chat.getUrl())
                 .build();
     }
