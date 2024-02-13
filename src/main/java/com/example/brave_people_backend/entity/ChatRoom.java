@@ -49,7 +49,19 @@ public class ChatRoom {
     @Column(columnDefinition = "timestamp", nullable = false, updatable = false)
     private LocalDateTime bEnteredAt;
 
+    @ColumnDefault("false")
+    @Column(columnDefinition = "TINYINT(1)", nullable = false)
+    private boolean aIsRead;
+
+    @ColumnDefault("false")
+    @Column(columnDefinition = "TINYINT(1)", nullable = false)
+    private boolean bIsRead;
+
     public void changeContact(Contact contact) {
         this.contact = contact;
     }
+
+    public void changeAIsRead() { this.aIsRead = true; }
+
+    public void changeBIsRead() { this.bIsRead = true; }
 }
