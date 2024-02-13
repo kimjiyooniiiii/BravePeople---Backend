@@ -1,15 +1,15 @@
 package com.example.brave_people_backend.chat.service;
 
+import com.example.brave_people_backend.board.dto.ContactResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
 import com.example.brave_people_backend.chat.dto.SendResponseDto;
-import com.example.brave_people_backend.entity.Chat;
-import com.example.brave_people_backend.entity.ChatRoom;
-import com.example.brave_people_backend.entity.Member;
+import com.example.brave_people_backend.entity.*;
+import com.example.brave_people_backend.enumclass.Act;
+import com.example.brave_people_backend.enumclass.ContactStatus;
+import com.example.brave_people_backend.exception.Custom404Exception;
 import com.example.brave_people_backend.exception.CustomException;
-import com.example.brave_people_backend.repository.ChatRepository;
-import com.example.brave_people_backend.repository.ChatRoomRepository;
-import com.example.brave_people_backend.repository.MemberRepository;
+import com.example.brave_people_backend.repository.*;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +27,8 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
     private final ChatRepository chatRepository;
+    private final BoardRepository boardRepository;
+    private final ContactRepository contactRepository;
 
     // 달려가기, 부탁하기 -> 채팅방 생성
     public ChatRoom createChatRoom(Member memberA, Member memberB) {
@@ -108,5 +110,64 @@ public class ChatRoomService {
                 .toList();
 
         return ChatResponseDto.of(other, messages);
+    }
+
+    //의뢰 만들기
+    public ContactResponseDto makeContact(Long postId) {
+        //로그인한 멤버 관련 데이터 초기화
+        Long currentId = SecurityUtil.getCurrentId();
+        Member currentMember = memberRepository.findById(currentId)
+                .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
+
+        //게시글 관련 데이터 초기화
+        Post currentPost = boardRepository.findPostById(postId)
+                .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
+        Act currentAct = currentPost.getAct();
+        Member postMember = currentPost.getMember();
+
+        //본인과의 채팅방이 개설되지 않게 함
+        if(postMember == currentMember) {
+            throw new CustomException(String.valueOf(postId), "본인의 게시글");
+        }
+
+        //Act에 따른 helper, client 초기화
+        Member helper, client;
+        if(Act.원정대 == currentAct) {
+            helper = postMember;
+            client = currentMember;
+        } else {
+            helper = currentMember;
+            client = postMember;
+        }
+
+        //helper와 client 사이에 진행중인 의뢰가 있으면 오류
+        if (contactRepository.existsByContactStatusAndClientAndHelper(ContactStatus.진행중, client, helper)) {
+            throw new CustomException(client.getMemberId() + ", " + helper.getMemberId(), "진행중인 의뢰 존재");
+        }
+
+        //같은 원정대가 같은 게시글에 중복해서 달려가기 못하게 막음
+        if (currentAct == Act.의뢰인 && contactRepository.existsByClientAndHelper(client, helper)) {
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "의뢰 중복");
+        }
+
+        //존재하는 채팅방이 없으면 새로운 채팅방 생성
+        Contact contact  = Contact.builder()
+                .helper(helper)
+                .client(client)
+                .post(currentPost)
+                .contactStatus(ContactStatus.대기중)
+                .isHelperFinished(false)
+                .isClientFinished(false)
+                .isDeleted(false)
+                .build();
+
+        contactRepository.save(contact);
+
+        //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 없으면 생성
+        ChatRoom chatRoom = chatRoomRepository.findChatRoom(helper, client)
+                .orElseGet(() -> createChatRoom(helper, client));
+        chatRoom.changeContact(contact);
+
+        return ContactResponseDto.of(chatRoom.getChatRoomId());
     }
 }

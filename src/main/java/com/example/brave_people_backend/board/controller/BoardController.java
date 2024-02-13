@@ -1,10 +1,11 @@
 package com.example.brave_people_backend.board.controller;
 
 import com.example.brave_people_backend.board.dto.ContactResponseDto;
-import com.example.brave_people_backend.board.dto.PostRequestDto;
 import com.example.brave_people_backend.board.dto.PostListResponseDto;
+import com.example.brave_people_backend.board.dto.PostRequestDto;
 import com.example.brave_people_backend.board.dto.PostResponseDto;
 import com.example.brave_people_backend.board.service.BoardService;
+import com.example.brave_people_backend.chat.service.ChatRoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class BoardController {
 
     private final BoardService boardService;
+    private final ChatRoomService chatRoomService;
 
     //글 목록 조회
     @GetMapping
@@ -55,7 +57,7 @@ public class BoardController {
     //의뢰 만들기
     @GetMapping("/{postId}/request")
     public ContactResponseDto makeContact (@PathVariable("postId") Long postId) {
-        return boardService.makeContact(postId);
+        return chatRoomService.makeContact(postId);
     }
 
 }

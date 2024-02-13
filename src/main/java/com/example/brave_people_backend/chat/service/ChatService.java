@@ -9,23 +9,25 @@ import com.example.brave_people_backend.enumclass.MessageType;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.ChatRepository;
 import com.example.brave_people_backend.repository.ChatRoomRepository;
-import org.springframework.transaction.annotation.Transactional;
+import com.example.brave_people_backend.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ChatService {
 
     private final SimpMessageSendingOperations template;
     private final ChatRepository chatRepository;
+    private final SseService sseService;
     private final ChatRoomRepository chatRoomRepository;
 
     // 메시지 전송
@@ -51,7 +53,17 @@ public class ChatService {
 
             template.convertAndSend("/sub/" + roomId, SendResponseDto.of(chatRepository.save(chat)));
         }
+
+        //roomId로 채팅방을 찾음
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
+
+        // 받는 사람을 찾음
+        Member other = chatRoom.getMemberA().getMemberId().equals(sendRequestDto.getSenderId()) ? chatRoom.getMemberB() : chatRoom.getMemberA();
+        //받는 사람에게 sse로 알림 전송
+        sseService.sendEventToClient(other.getMemberId(), chatRoom.getChatRoomId());
+
     }
+
 
     // WebSocket 연결 해제
     @Transactional
@@ -66,9 +78,9 @@ public class ChatService {
                 .orElseThrow(()->new CustomException(String.valueOf(roomId),"존재하지 않는 roomId"));
 
         // 채팅 읽기 여부, 읽음 처리
-        if(chatRoom.getMemberA().getMemberId() == userId) {
+        if(chatRoom.getMemberA().getMemberId().equals(userId)) {
             chatRoom.changeAIsRead();
-        } else if(chatRoom.getMemberB().getMemberId() == userId) {
+        } else if(chatRoom.getMemberB().getMemberId().equals(userId)) {
             chatRoom.changeBIsRead();
         }
     }

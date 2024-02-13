@@ -1,5 +1,6 @@
 package com.example.brave_people_backend.chat.controller;
 
+import com.example.brave_people_backend.board.dto.ContactResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
 import com.example.brave_people_backend.chat.service.ChatRoomService;
