@@ -59,8 +59,10 @@ public class ChatService {
 
         // 받는 사람을 찾음
         Member other = chatRoom.getMemberA().getMemberId().equals(sendRequestDto.getSenderId()) ? chatRoom.getMemberB() : chatRoom.getMemberA();
-        //받는 사람에게 sse로 알림 전송
-        sseService.sendEventToClient(other.getMemberId(), chatRoom.getChatRoomId());
+        //받는 사람에게 sse로 알림 전송, TALK일 때만 알림 전송
+        if (type == MessageType.TALK) {
+            sseService.sendEventToClient(other.getMemberId(), chatRoom.getChatRoomId());
+        }
 
     }
 

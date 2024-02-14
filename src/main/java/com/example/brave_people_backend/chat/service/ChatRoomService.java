@@ -67,7 +67,6 @@ public class ChatRoomService {
                     Chat.builder()
                             .senderId(other.getMemberId())
                             .roomId(chatRoom.getChatRoomId())
-                            .isRead(false)
                             .sendAt(null)
                             .message("최근 채팅 없음")
                             .url(null)

@@ -28,8 +28,8 @@ public class ChatRoomResponseVo {
                 .otherProfileImg(other.getProfileImg())
                 .otherNickname(other.getNickname())
                 .otherId(other.getMemberId())
-                //마지막 채팅 보낸 사람이 상대방이면 chat.isRead() 아니면(마지막 채팅이 나면) false
-                .isRead(!chat.getSenderId().equals(other.getMemberId()) || chat.isRead())
+                //상대방이 A면, 나는 B이므로 B의 읽음 여부 반환, 반대 경우도 마찬가지
+                .isRead(other == chatRoom.getMemberA() ? chatRoom.isBIsRead() : chatRoom.isAIsRead())
                 .status(chatRoom.getContact().getContactStatus())
                 .build();
     }

@@ -18,7 +18,7 @@ public class SseController {
 
     //SSE 연결
     @GetMapping(value = "/stream/{clientId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream(@PathVariable Long clientId) {
+    public SseEmitter stream(@PathVariable("clientId") Long clientId) {
         return sseService.stream(clientId);
     }
 }

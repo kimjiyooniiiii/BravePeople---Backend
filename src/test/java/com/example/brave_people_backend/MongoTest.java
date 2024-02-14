@@ -21,7 +21,6 @@ public class MongoTest {
                 .roomId(2L)
                 .senderId(3L)
                 .message("chatId 얻어버려~")
-                .isRead(false)
                 .url(null)
                 .build();
 
