@@ -33,6 +33,12 @@ public class SseService {
         });
 
         emitters.put(clientId, emitter);
+        try {
+            emitter.send(SseEmitter.event().id(String.valueOf(clientId)).name("sse").data("연결 성공"));
+        }
+        catch (IOException e) {
+            emitter.completeWithError(e);
+        }
         return emitter;
     }
 
