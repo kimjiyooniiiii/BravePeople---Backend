@@ -1,7 +1,7 @@
 package com.example.brave_people_backend.sse.service;
 
-import com.example.brave_people_backend.exception.CustomException;
-import com.example.brave_people_backend.sse.dto.NewChatRoomNotificationDto;
+import com.example.brave_people_backend.enumclass.NotificationType;
+import com.example.brave_people_backend.sse.dto.NotificationDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -21,20 +21,19 @@ public class SseService {
         //emitter가 연결 완료 , 오류 , 타임아웃일 때 emitters에서 remove
         emitter.onCompletion(() -> {
             emitters.remove(clientId);
-            cleanupEmitter(emitter);
+            emitter.complete();
         });
         emitter.onError((ex) -> {
             emitters.remove(clientId);
-            cleanupEmitter(emitter);
-        });
+            emitter.complete();        });
         emitter.onTimeout(() -> {
             emitters.remove(clientId);
-            cleanupEmitter(emitter);
+            emitter.complete();
         });
 
         emitters.put(clientId, emitter);
         try {
-            emitter.send(SseEmitter.event().id(String.valueOf(clientId)).name("sse").data("연결 성공"));
+            emitter.send(SseEmitter.event().data(NotificationDto.of(NotificationType.CONNECT, null)));
         }
         catch (IOException e) {
             emitter.completeWithError(e);
@@ -43,24 +42,15 @@ public class SseService {
     }
 
     //서버에서 client로 event 전송
-    public void sendEventToClient(Long clientId, Long roomId) {
+    public void sendEventToClient(NotificationType type, Long clientId, String message) {
         SseEmitter emitter = emitters.get(clientId);
         if(emitter != null) {
             try {
-                emitter.send(SseEmitter.event().data(NewChatRoomNotificationDto.of(roomId)));
+                emitter.send(SseEmitter.event().data(NotificationDto.of(type, message)));
             }
             catch(IOException e) {
                 emitter.completeWithError(e);
             }
-        }
-    }
-
-    private void cleanupEmitter(SseEmitter emitter) {
-        try {
-            emitter.complete();
-        }
-        catch (Exception e) {
-            throw new CustomException(String.valueOf(emitters.size()), "cleanupEmitter()");
         }
     }
 }

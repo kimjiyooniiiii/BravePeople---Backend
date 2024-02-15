@@ -6,6 +6,7 @@ import com.example.brave_people_backend.entity.Chat;
 import com.example.brave_people_backend.entity.ChatRoom;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.enumclass.MessageType;
+import com.example.brave_people_backend.enumclass.NotificationType;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.ChatRepository;
 import com.example.brave_people_backend.repository.ChatRoomRepository;
@@ -57,11 +58,13 @@ public class ChatService {
         //roomId로 채팅방을 찾음
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
 
+        //보내는 사람을 찾음
+        Member me = chatRoom.getMemberA().getMemberId().equals(sendRequestDto.getSenderId()) ? chatRoom.getMemberA() : chatRoom.getMemberB();
         // 받는 사람을 찾음
         Member other = chatRoom.getMemberA().getMemberId().equals(sendRequestDto.getSenderId()) ? chatRoom.getMemberB() : chatRoom.getMemberA();
         //받는 사람에게 sse로 알림 전송, TALK일 때만 알림 전송
         if (type == MessageType.TALK) {
-            sseService.sendEventToClient(other.getMemberId(), chatRoom.getChatRoomId());
+            sseService.sendEventToClient(NotificationType.NEW_CHAT, other.getMemberId(), me.getNickname()+"님이 메시지를 보냈습니다.");
         }
 
     }

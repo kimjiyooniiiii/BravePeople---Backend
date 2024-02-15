@@ -7,16 +7,20 @@ import com.example.brave_people_backend.chat.dto.SendResponseDto;
 import com.example.brave_people_backend.entity.*;
 import com.example.brave_people_backend.enumclass.Act;
 import com.example.brave_people_backend.enumclass.ContactStatus;
+import com.example.brave_people_backend.enumclass.NotificationType;
 import com.example.brave_people_backend.exception.Custom404Exception;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.*;
 import com.example.brave_people_backend.security.SecurityUtil;
+import com.example.brave_people_backend.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -29,6 +33,7 @@ public class ChatRoomService {
     private final ChatRepository chatRepository;
     private final BoardRepository boardRepository;
     private final ContactRepository contactRepository;
+    private final SseService sseService;
 
     // 달려가기, 부탁하기 -> 채팅방 생성
     public ChatRoom createChatRoom(Member memberA, Member memberB) {
@@ -60,18 +65,9 @@ public class ChatRoomService {
         for (ChatRoom chatRoom : chatRoomList) {
             // 멤버(상대방) 초기화
             Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
+
             // 마지막 채팅을 List<Chat> 형태로 받아옴
-            List<Chat> chatListOne = chatRepository.findChatOneByRoomId(chatRoom.getChatRoomId(), pageRequest);
-            // 채팅방에 채팅이 1개도 존재하지 않으면 chatListOne.isEmpty == true 이므로 임의 채팅(최근 채팅 없음) 생성
-            Chat lastChat = chatListOne.isEmpty() ?
-                    Chat.builder()
-                            .senderId(other.getMemberId())
-                            .roomId(chatRoom.getChatRoomId())
-                            .sendAt(null)
-                            .message("최근 채팅 없음")
-                            .url(null)
-                            .build()
-                    : chatListOne.get(0);
+            Chat lastChat = chatRepository.findChatOneByRoomId(chatRoom.getChatRoomId(), pageRequest).get(0);
 
             //마지막 메시지가 사진이면 message를 "사진을 보냈습니다."로 설정
             if (lastChat.getMessage() == null) {
@@ -80,7 +76,8 @@ public class ChatRoomService {
             //채팅방, 상대방, 마지막 채팅을 파라미터로 넘겨주고 result 리스트에 추가
             result.add(ChatRoomResponseVo.of(chatRoom, other, lastChat));
         }
-
+        //마지막 채팅 최신순으로 정렬
+        Collections.sort(result);
         return result;
     }
 
@@ -164,7 +161,22 @@ public class ChatRoomService {
 
         //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 없으면 생성
         ChatRoom chatRoom = chatRoomRepository.findChatRoom(helper, client)
-                .orElseGet(() -> createChatRoom(helper, client));
+                .orElseGet(() -> {
+                    ChatRoom newRoom = createChatRoom(helper, client);
+                    //새로 생성된 채팅방에 대한 알림을 전송
+                    sseService.sendEventToClient(NotificationType.NEW_CHAT_ROOM, postMember.getMemberId(), currentMember.getNickname()+"님이 채팅방을 개설하였습니다.");
+                    //빈 채팅 생성 후 save
+                    Chat makeChat = Chat.builder()
+                            .senderId(-1L)
+                            .roomId(newRoom.getChatRoomId())
+                            .isRead(false)
+                            .sendAt(LocalDateTime.now())
+                            .message(currentMember.getNickname() + "님이 채팅방을 개설하였습니다.")
+                            .url(null)
+                            .build();
+                    chatRepository.save(makeChat);
+                    return newRoom;
+                });
         chatRoom.changeContact(contact);
 
         return ContactResponseDto.of(chatRoom.getChatRoomId());
