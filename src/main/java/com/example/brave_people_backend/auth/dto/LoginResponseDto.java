@@ -1,10 +1,8 @@
 package com.example.brave_people_backend.auth.dto;
 
 import com.example.brave_people_backend.entity.Member;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -26,7 +24,7 @@ public class LoginResponseDto {
 
     private List<Long> chatRooms;
 
-    private boolean isRead;
+    private Boolean isRead;
 
     public static LoginResponseDto of(Member member, List<Long> chatRooms, TokenDto tokenDto, boolean isRead) {
         return LoginResponseDto.builder()

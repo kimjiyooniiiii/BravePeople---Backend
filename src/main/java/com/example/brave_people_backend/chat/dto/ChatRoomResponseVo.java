@@ -19,7 +19,7 @@ public class ChatRoomResponseVo implements Comparable<ChatRoomResponseVo> {
     private String otherProfileImg;
     private String otherNickname;
     private Long otherId;
-    private boolean isRead;
+    private Boolean isRead;
     private ContactStatus status;
     private LocalDateTime time;
 

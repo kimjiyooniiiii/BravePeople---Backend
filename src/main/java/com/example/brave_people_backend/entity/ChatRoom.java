@@ -61,7 +61,7 @@ public class ChatRoom {
         this.contact = contact;
     }
 
-    public void changeAIsRead() { this.aIsRead = true; }
+    public void changeAIsRead(boolean aIsRead) { this.aIsRead = aIsRead; }
 
-    public void changeBIsRead() { this.bIsRead = true; }
+    public void changeBIsRead(boolean bIsRead) { this.bIsRead = bIsRead; }
 }
