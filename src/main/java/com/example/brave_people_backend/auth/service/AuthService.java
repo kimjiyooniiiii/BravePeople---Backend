@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -96,14 +97,23 @@ public class AuthService {
         member.changeRefreshToken(tokenDto.getRefreshToken());
 
         // 내가 참여중인 채팅방 리스트
-        List<Long> chatRooms = chatRoomRepository.findChatRoomByMemberId(Long.parseLong(authenticate.getName()));
+        List<ChatRoom> chatRooms = chatRoomRepository.findChatRoomByMemberId(Long.parseLong(authenticate.getName()));
+        List<Long> roomNum = new ArrayList<>();
+        boolean isRead = true;
 
-        // 읽지 않은 메시지 가져오기
-        List<Chat> isNotReadChat = chatRepository.findChatByReadIs(chatRooms);
+        for(ChatRoom r : chatRooms) {
+            // 채팅방 번호만 저장
+            roomNum.add(r.getChatRoomId());
+            // A,B 중 해당하는 객체의 읽기여부 확인
+            String identity = r.getMemberA().getMemberId().equals(member.getMemberId()) ? "A" : "B";
+            if(identity.equals("A") && r.isAIsRead() == false) {
+                isRead = false;
+            } else if(identity.equals("B") && r.isBIsRead() == false) {
+                isRead = false;
+            }
+        }
 
-        boolean isRead = (isNotReadChat.isEmpty()) ? true : false;
-
-        return LoginResponseDto.of(member, chatRooms, tokenDto, isRead);
+        return LoginResponseDto.of(member, roomNum, tokenDto, isRead);
     }
 
     // refresh token으로 access token 재발급 받기
