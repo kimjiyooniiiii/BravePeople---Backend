@@ -141,17 +141,24 @@ public class ChatRoomService {
             throw new CustomException(client.getMemberId() + ", " + helper.getMemberId(), "진행중인 의뢰 존재");
         }
 
-        //같은 원정대가 같은 게시글에 중복해서 달려가기 못하게 막음
-        if (currentAct == Act.의뢰인 && contactRepository.existsByClientAndHelper(client, helper)) {
+        //같은 사람이 같은 게시글에 중복해서 부탁하기/달려가기 하면 오류
+        if (contactRepository.existsByClientAndHelper(client, helper)) {
             throw new CustomException(String.valueOf(currentPost.getPostId()), "의뢰 중복");
         }
 
-        //존재하는 채팅방이 없으면 새로운 채팅방 생성
+        //해당 postId로 진행중인 의뢰가 있으면 오류
+        if (contactRepository.existsByContactStatusAndPost(ContactStatus.진행중, currentPost)) {
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "진행중인 의뢰 존재");
+        }
+
+        //의뢰가 진행 가능한 상태이면 새 contact 생성
         Contact contact  = Contact.builder()
                 .helper(helper)
                 .client(client)
                 .post(currentPost)
                 .contactStatus(ContactStatus.대기중)
+                .writerStatus(ContactStatus.대기중)
+                .otherStatus(ContactStatus.진행중)
                 .isHelperFinished(false)
                 .isClientFinished(false)
                 .isDeleted(false)
@@ -180,5 +187,46 @@ public class ChatRoomService {
         chatRoom.changeContact(contact);
 
         return ContactResponseDto.of(chatRoom.getChatRoomId());
+    }
+
+    public void acceptContact(Long roomId){
+
+        //현재 채팅방을 찾음
+        ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
+        //채팅방에 연결된 contact를 찾음
+        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
+                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰")
+        );
+
+        //현재 contact의 글 작성자의 상태를 진행중으로 바꿈 -> writer, other 모두 진행중 상태가 됨
+        currentContact.changeWriterStatus(ContactStatus.진행중);
+
+        //현재 post를 찾음
+        Post currentPost = boardRepository.findPostById(currentContact.getPost().getPostId()).orElseThrow(() ->
+                new CustomException(String.valueOf(currentContact.getPost().getPostId()), "존재하지 않는 채팅방ID"));
+
+        //같은 postId로 생성된 contact를 찾음 -> 같은 게시글에서 생성된 의뢰들의 상태를 취소로 변경
+        List<Contact> findContacts = contactRepository.findContactsByPost(currentPost);
+        for (Contact findContact : findContacts) {
+            //찾은 의뢰ID가 현재 의뢰ID와 다르고, 작성자의 상태가 대기중이면 해당 의뢰에 관련된 member의 상태를 취소로 변경
+            if ((!findContact.getContactId().equals(currentContact.getContactId())) && (findContact.getWriterStatus().equals(ContactStatus.대기중))) {
+                findContact.changeWriterStatus(ContactStatus.취소);
+                findContact.changeOtherStatus(ContactStatus.취소);
+            }
+        }
+    }
+
+    public void cancelContact(Long roomId) {
+
+        //roomId에 연결되어있는 contactId로 contact를 찾음 -> contact의 writer,other의 ContactStatus를 취소로 바꿈
+
+        ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
+
+        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(() ->
+                new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰"));
+
+        currentContact.changeWriterStatus(ContactStatus.취소);
+        currentContact.changeOtherStatus(ContactStatus.취소);
+
     }
 }

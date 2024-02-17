@@ -4,7 +4,6 @@ import com.example.brave_people_backend.board.dto.PostListResponseDto;
 import com.example.brave_people_backend.board.dto.PostListVo;
 import com.example.brave_people_backend.board.dto.PostRequestDto;
 import com.example.brave_people_backend.board.dto.PostResponseDto;
-import com.example.brave_people_backend.chat.service.ChatRoomService;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
 import com.example.brave_people_backend.enumclass.Act;
@@ -29,7 +28,6 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
-    public final ChatRoomService chatRoomService;
 
     // 글 목록 불러오기
     @Transactional(readOnly = true)

@@ -32,6 +32,14 @@ public class Contact {
     @Column(columnDefinition = "varchar(10)", nullable = false)
     private ContactStatus contactStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(10)", nullable = false)
+    private ContactStatus writerStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(10)", nullable = false)
+    private ContactStatus otherStatus;
+
     @ColumnDefault("false")
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     private boolean isHelperFinished;
@@ -44,7 +52,12 @@ public class Contact {
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     private boolean isDeleted;
 
-    /*@LastModifiedBy
-    @Column(columnDefinition = "timestamp", nullable = false)
-    private LocalDateTime modifiedAt;*/
+
+    public void changeWriterStatus(ContactStatus contactStatus) {
+        this.writerStatus = contactStatus;
+    }
+
+    public void changeOtherStatus(ContactStatus contactStatus) {
+        this.otherStatus = contactStatus;
+    }
 }
