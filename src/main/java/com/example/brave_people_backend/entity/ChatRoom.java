@@ -57,6 +57,9 @@ public class ChatRoom {
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     private boolean bIsRead;
 
+    @ColumnDefault("0")
+    private int count;          // 실시간 참여자 수
+
     public void changeContact(Contact contact) {
         this.contact = contact;
     }
@@ -64,4 +67,8 @@ public class ChatRoom {
     public void changeAIsRead(boolean aIsRead) { this.aIsRead = aIsRead; }
 
     public void changeBIsRead(boolean bIsRead) { this.bIsRead = bIsRead; }
+
+    public void changeCountPlus() { this.count += 1; }
+
+    public void changeCountMinus() { this.count -= 1; }
 }
