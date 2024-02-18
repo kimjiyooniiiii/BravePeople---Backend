@@ -22,6 +22,7 @@ public class ChatRoomResponseVo implements Comparable<ChatRoomResponseVo> {
     private Boolean isRead;
     private ContactStatus status;
     private LocalDateTime time;
+    private Boolean isActive;
 
     public static ChatRoomResponseVo of(ChatRoom chatRoom, Member other, Chat chat) {
         return ChatRoomResponseVo.builder()
@@ -35,6 +36,7 @@ public class ChatRoomResponseVo implements Comparable<ChatRoomResponseVo> {
                 .isRead(other == chatRoom.getMemberA() ? chatRoom.isBIsRead() : chatRoom.isAIsRead())
                 .status(chatRoom.getContact().getContactStatus())
                 .time(chat.getSendAt())
+                .isActive(true)
                 .build();
     }
 
