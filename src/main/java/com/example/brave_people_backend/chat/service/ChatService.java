@@ -58,6 +58,8 @@ public class ChatService {
             } else {
                 chatRoom.changeBIsRead(true);
             }
+
+            chatRoom.changeCountPlus();
         }
         // 채팅 메시지 전송 Logic
         else {
@@ -74,11 +76,13 @@ public class ChatService {
             //받는 사람에게 sse로 알림 전송, TALK일 때만 알림 전송
             sseService.sendEventToClient(NotificationType.NEW_CHAT, other.getMemberId(), me.getNickname()+"님이 메시지를 보냈습니다.");
 
-            // 상대방의 채팅 읽음 여부를 false로 변경
-            if(chatRoom.getMemberA() == other) {
-                chatRoom.changeAIsRead(false);
-            } else {
-                chatRoom.changeBIsRead(false);
+            // 현재 상대방이 오프라인이면 상대방의 채팅 읽음 여부를 false로 변경
+            if(chatRoom.getCount() == 1) {
+                if(chatRoom.getMemberA() == other) {
+                    chatRoom.changeAIsRead(false);
+                } else {
+                    chatRoom.changeBIsRead(false);
+                }
             }
         }
 
@@ -101,5 +105,7 @@ public class ChatService {
         } else if(chatRoom.getMemberB().getMemberId().equals(userId)) {
             chatRoom.changeBIsRead(true);
         }
+
+        chatRoom.changeCountMinus();
     }
 }
