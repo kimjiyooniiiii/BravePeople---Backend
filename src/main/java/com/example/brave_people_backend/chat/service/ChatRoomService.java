@@ -1,10 +1,7 @@
 package com.example.brave_people_backend.chat.service;
 
 import com.example.brave_people_backend.board.dto.ContactResponseDto;
-import com.example.brave_people_backend.chat.dto.ChatResponseDto;
-import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
-import com.example.brave_people_backend.chat.dto.ContactResponseVo;
-import com.example.brave_people_backend.chat.dto.SendResponseDto;
+import com.example.brave_people_backend.chat.dto.*;
 import com.example.brave_people_backend.entity.*;
 import com.example.brave_people_backend.enumclass.Act;
 import com.example.brave_people_backend.enumclass.ContactStatus;
@@ -35,6 +32,7 @@ public class ChatRoomService {
     private final BoardRepository boardRepository;
     private final ContactRepository contactRepository;
     private final SseService sseService;
+    private final ReviewRepository reviewRepository;
 
     // 달려가기, 부탁하기 -> 채팅방 생성
     public ChatRoom createChatRoom(Member memberA, Member memberB) {
@@ -231,5 +229,61 @@ public class ChatRoomService {
         currentContact.changeWriterStatus(ContactStatus.취소);
         currentContact.changeOtherStatus(ContactStatus.취소);
 
+    }
+
+    public void finishContact(Long roomId) {
+        ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
+        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
+                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
+        Long currentId = SecurityUtil.getCurrentId();
+        /*Member curretMember = memberRepository.findById(currentId).orElseThrow(
+                () -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));*/
+        // currentId == writer인 경우
+        if (currentId.equals(currentContact.getClient().getMemberId())) { //TODO client->writer, helper->other로 수정할 것
+            currentContact.changeWriterStatus(ContactStatus.완료);
+        } else { //currentId == other인 경우
+            currentContact.changeOtherStatus(ContactStatus.완료);
+        }
+    }
+
+    public void reviewContact(Long roomId, ReviewRequestDto reviewRequestDto) {
+        // ChatRoom, Contact, other 선언 및 초기화
+        ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
+        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
+                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
+        Long currentId = SecurityUtil.getCurrentId();
+        Member other;
+
+        //TODO client->writer, helper->other로 수정할 것
+        //
+        if (currentId.equals(currentContact.getClient().getMemberId())) {
+            if (currentContact.getWriterStatus() != ContactStatus.완료) {
+                throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
+            }
+            other = currentContact.getHelper();
+        } else if (currentId.equals(currentContact.getHelper().getMemberId())) {
+            if (currentContact.getOtherStatus() != ContactStatus.완료) {
+                throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
+            }
+            other = currentContact.getClient();
+        } else {
+            throw new CustomException(String.valueOf(currentContact.getContactId()), "나의 의뢰가 아님");
+        }
+
+        if (reviewRepository.existsByContactAndMember(currentContact, other)) {
+            throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 리뷰 존재");
+        }
+
+        Review review = Review.builder()
+                .member(other)
+                .contact(currentContact)
+                .score(reviewRequestDto.getScore())
+                .contents((reviewRequestDto.getContents()))
+                .isDisabled(false)
+                .build();
+
+        reviewRepository.save(review);
     }
 }

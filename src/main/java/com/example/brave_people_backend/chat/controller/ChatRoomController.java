@@ -2,12 +2,11 @@ package com.example.brave_people_backend.chat.controller;
 
 import com.example.brave_people_backend.chat.dto.ChatResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
+import com.example.brave_people_backend.chat.dto.ReviewRequestDto;
 import com.example.brave_people_backend.chat.service.ChatRoomService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,5 +36,16 @@ public class ChatRoomController {
     @GetMapping("/contact/{roomId}/cancel")
     public void cancelContact(@PathVariable("roomId") Long roomId) {
         chatRoomService.cancelContact(roomId);
+    }
+
+    @GetMapping("/contact/{roomId}/finish")
+    public void finishContact(@PathVariable("roomId") Long roomId) {
+        chatRoomService.finishContact(roomId);
+    }
+
+    @PostMapping("/contact/{roomId}/review")
+    public void reviewContact(@PathVariable("roomId") Long roomId,
+                              @RequestBody @Valid ReviewRequestDto reviewRequestDto) {
+        chatRoomService.reviewContact(roomId, reviewRequestDto);
     }
 }
