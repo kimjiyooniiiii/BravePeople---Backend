@@ -3,6 +3,7 @@ package com.example.brave_people_backend.chat.service;
 import com.example.brave_people_backend.board.dto.ContactResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
+import com.example.brave_people_backend.chat.dto.ContactResponseVo;
 import com.example.brave_people_backend.chat.dto.SendResponseDto;
 import com.example.brave_people_backend.entity.*;
 import com.example.brave_people_backend.enumclass.Act;
@@ -88,7 +89,9 @@ public class ChatRoomService {
         Member me = memberRepository.findById(currentId)
                 .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방"));
+                .orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
+        Contact contact = contactRepository.findById(chatRoom.getContact().getContactId())
+                .orElseThrow(() -> new CustomException(String.valueOf(chatRoom.getChatRoomId()), "존재하지 않는 의뢰ID"));
 
         // 채팅방 참여자가 아닌 경우 예외 발생
         if (chatRoom.getMemberA() != me && chatRoom.getMemberB() != me) {
@@ -105,7 +108,7 @@ public class ChatRoomService {
                 .map(SendResponseDto::of)
                 .toList();
 
-        return ChatResponseDto.of(other, messages);
+        return ChatResponseDto.of(other, messages, ContactResponseVo.of(contact));
     }
 
     //의뢰 만들기

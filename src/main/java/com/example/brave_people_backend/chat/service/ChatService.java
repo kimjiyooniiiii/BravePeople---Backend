@@ -55,7 +55,7 @@ public class ChatService {
             // 채팅 읽기 여부, 읽음 처리
             if(chatRoom.getMemberA() == me) {
                 chatRoom.changeAIsRead(true);
-            } else if(chatRoom.getMemberB() == me) {
+            } else {
                 chatRoom.changeBIsRead(true);
             }
 
