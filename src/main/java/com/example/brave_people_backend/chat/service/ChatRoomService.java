@@ -3,7 +3,6 @@ package com.example.brave_people_backend.chat.service;
 import com.example.brave_people_backend.board.dto.ContactResponseDto;
 import com.example.brave_people_backend.chat.dto.*;
 import com.example.brave_people_backend.entity.*;
-import com.example.brave_people_backend.enumclass.Act;
 import com.example.brave_people_backend.enumclass.ContactStatus;
 import com.example.brave_people_backend.enumclass.NotificationType;
 import com.example.brave_people_backend.exception.Custom404Exception;
@@ -119,7 +118,6 @@ public class ChatRoomService {
         //게시글 관련 데이터 초기화
         Post currentPost = boardRepository.findPostById(postId)
                 .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
-        Act currentAct = currentPost.getAct();
         Member postMember = currentPost.getMember();
 
         //본인과의 채팅방이 개설되지 않게 함
@@ -127,50 +125,44 @@ public class ChatRoomService {
             throw new CustomException(String.valueOf(postId), "본인의 게시글");
         }
 
-        //Act에 따른 helper, client 초기화
-        Member helper, client;
-        if(Act.원정대 == currentAct) {
-            helper = postMember;
-            client = currentMember;
-        } else {
-            helper = currentMember;
-            client = postMember;
+        /* writer -> 글 작성자
+        * other -> 부탁하기/달려가기 누르는 사람, 즉 currentMember
+        * postMember은 항상 writer, currentMember은 항상 other가 됨
+        * */
+
+        List<Contact> findContact = contactRepository.findContactOneByStatusAndPostId(postId);
+        //해당 postId로 진행중인 의뢰가 있으면 오류
+        if (!findContact.isEmpty()) {
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "진행중인 의뢰 존재");
         }
 
-        //helper와 client 사이에 진행중인 의뢰가 있으면 오류
-        if (contactRepository.existsByContactStatusAndClientAndHelper(ContactStatus.진행중, client, helper)) {
-            throw new CustomException(client.getMemberId() + ", " + helper.getMemberId(), "진행중인 의뢰 존재");
+        //writer와 other 사이에 진행중인 의뢰가 있으면 오류
+        findContact = contactRepository.findContactOneByStatus(postMember, currentMember);
+        if(!findContact.isEmpty()) {
+            throw new CustomException(postMember.getMemberId() + ", " + currentMember.getMemberId(), "진행중인 의뢰 존재");
         }
 
         //같은 사람이 같은 게시글에 중복해서 부탁하기/달려가기 하면 오류
-        if (contactRepository.existsByClientAndHelper(client, helper)) {
+        if (contactRepository.existsByWriterAndOtherAndPost(postMember, currentMember, currentPost)) {
             throw new CustomException(String.valueOf(currentPost.getPostId()), "의뢰 중복");
-        }
-
-        //해당 postId로 진행중인 의뢰가 있으면 오류
-        if (contactRepository.existsByContactStatusAndPost(ContactStatus.진행중, currentPost)) {
-            throw new CustomException(String.valueOf(currentPost.getPostId()), "진행중인 의뢰 존재");
         }
 
         //의뢰가 진행 가능한 상태이면 새 contact 생성
         Contact contact  = Contact.builder()
-                .helper(helper)
-                .client(client)
+                .writer(postMember)
+                .other(currentMember)
                 .post(currentPost)
-                .contactStatus(ContactStatus.대기중)
                 .writerStatus(ContactStatus.대기중)
                 .otherStatus(ContactStatus.진행중)
-                .isHelperFinished(false)
-                .isClientFinished(false)
                 .isDeleted(false)
                 .build();
 
         contactRepository.save(contact);
 
         //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 없으면 생성
-        ChatRoom chatRoom = chatRoomRepository.findChatRoom(helper, client)
+        ChatRoom chatRoom = chatRoomRepository.findChatRoom(postMember, currentMember)
                 .orElseGet(() -> {
-                    ChatRoom newRoom = createChatRoom(helper, client);
+                    ChatRoom newRoom = createChatRoom(postMember, currentMember);
                     //새로 생성된 채팅방에 대한 알림을 전송
                     sseService.sendEventToClient(NotificationType.NEW_CHAT_ROOM, postMember.getMemberId(), currentMember.getNickname()+"님이 채팅방을 개설하였습니다.");
                     //빈 채팅 생성 후 save
@@ -240,7 +232,7 @@ public class ChatRoomService {
         /*Member curretMember = memberRepository.findById(currentId).orElseThrow(
                 () -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));*/
         // currentId == writer인 경우
-        if (currentId.equals(currentContact.getClient().getMemberId())) { //TODO client->writer, helper->other로 수정할 것
+        if (currentId.equals(currentContact.getWriter().getMemberId())) { //TODO client->writer, helper->other로 수정할 것
             currentContact.changeWriterStatus(ContactStatus.완료);
         } else { //currentId == other인 경우
             currentContact.changeOtherStatus(ContactStatus.완료);
@@ -258,16 +250,16 @@ public class ChatRoomService {
 
         //TODO client->writer, helper->other로 수정할 것
         //
-        if (currentId.equals(currentContact.getClient().getMemberId())) {
+        if (currentId.equals(currentContact.getWriter().getMemberId())) {
             if (currentContact.getWriterStatus() != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
-            other = currentContact.getHelper();
-        } else if (currentId.equals(currentContact.getHelper().getMemberId())) {
+            other = currentContact.getOther();
+        } else if (currentId.equals(currentContact.getOther().getMemberId())) {
             if (currentContact.getOtherStatus() != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
-            other = currentContact.getClient();
+            other = currentContact.getWriter();
         } else {
             throw new CustomException(String.valueOf(currentContact.getContactId()), "나의 의뢰가 아님");
         }

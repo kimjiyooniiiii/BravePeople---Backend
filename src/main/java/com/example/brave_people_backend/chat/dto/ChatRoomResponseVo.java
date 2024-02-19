@@ -33,7 +33,7 @@ public class ChatRoomResponseVo implements Comparable<ChatRoomResponseVo> {
                 .otherId(other.getMemberId())
                 //상대방이 A면, 나는 B이므로 B의 읽음 여부 반환, 반대 경우도 마찬가지
                 .isRead(other == chatRoom.getMemberA() ? chatRoom.isBIsRead() : chatRoom.isAIsRead())
-                .status(chatRoom.getContact().getContactStatus())
+                .status(chatRoom.getContact().getOtherStatus())
                 .time(chat.getSendAt())
                 .build();
     }

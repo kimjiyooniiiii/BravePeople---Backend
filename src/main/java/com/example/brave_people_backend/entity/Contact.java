@@ -17,20 +17,16 @@ public class Contact {
     private Long contactId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "helper_id", nullable = false, updatable = false)
-    private Member helper;
+    @JoinColumn(name = "other_id", nullable = false, updatable = false)
+    private Member other;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false, updatable = false)
-    private Member client;
+    @JoinColumn(name = "writer_id", nullable = false, updatable = false)
+    private Member writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false, updatable = false)
     private Post post;
-
-    @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(10)", nullable = false)
-    private ContactStatus contactStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(10)", nullable = false)
@@ -39,14 +35,6 @@ public class Contact {
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(10)", nullable = false)
     private ContactStatus otherStatus;
-
-    @ColumnDefault("false")
-    @Column(columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean isHelperFinished;
-
-    @ColumnDefault("false")
-    @Column(columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean isClientFinished;
 
     @ColumnDefault("false")
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
