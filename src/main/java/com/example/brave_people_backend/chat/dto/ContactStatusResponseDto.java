@@ -7,14 +7,14 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ContactResponseVo {
+public class ContactStatusResponseDto {
     private ContactStatus status;
-    private Boolean isActive;
+    private Boolean isActive; //버튼 활성화 여부
 
-    public static ContactResponseVo of(Contact contact) {
-        return ContactResponseVo.builder()
-                .status(ContactStatus.대기중)
-                .isActive(true)
+    public static ContactStatusResponseDto of(ContactStatus status, boolean isActive) {
+        return ContactStatusResponseDto.builder()
+                .status(status)
+                .isActive(isActive)
                 .build();
     }
 }

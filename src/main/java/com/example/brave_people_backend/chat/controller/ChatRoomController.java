@@ -2,6 +2,7 @@ package com.example.brave_people_backend.chat.controller;
 
 import com.example.brave_people_backend.chat.dto.ChatResponseDto;
 import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
+import com.example.brave_people_backend.chat.dto.ContactStatusResponseDto;
 import com.example.brave_people_backend.chat.dto.ReviewRequestDto;
 import com.example.brave_people_backend.chat.service.ChatRoomService;
 import jakarta.validation.Valid;
@@ -29,23 +30,28 @@ public class ChatRoomController {
     }
 
     @GetMapping("/contact/{roomId}")
-    public void acceptContact(@PathVariable("roomId") Long roomId) {
-        chatRoomService.acceptContact(roomId);
+    public ContactStatusResponseDto acceptContact(@PathVariable("roomId") Long roomId) {
+        return chatRoomService.acceptContact(roomId);
     }
 
     @GetMapping("/contact/{roomId}/cancel")
-    public void cancelContact(@PathVariable("roomId") Long roomId) {
-        chatRoomService.cancelContact(roomId);
+    public ContactStatusResponseDto cancelContact(@PathVariable("roomId") Long roomId) {
+        return chatRoomService.cancelContact(roomId);
     }
 
     @GetMapping("/contact/{roomId}/finish")
-    public void finishContact(@PathVariable("roomId") Long roomId) {
-        chatRoomService.finishContact(roomId);
+    public ContactStatusResponseDto finishContact(@PathVariable("roomId") Long roomId) {
+        return chatRoomService.finishContact(roomId);
     }
 
     @PostMapping("/contact/{roomId}/review")
     public void reviewContact(@PathVariable("roomId") Long roomId,
                               @RequestBody @Valid ReviewRequestDto reviewRequestDto) {
         chatRoomService.reviewContact(roomId, reviewRequestDto);
+    }
+
+    @GetMapping("/contact/{roomId}/status")
+    public ContactStatusResponseDto getContactStatus(@PathVariable("roomId") Long roomId) {
+        return chatRoomService.getContactStatus(roomId);
     }
 }

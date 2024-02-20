@@ -105,7 +105,7 @@ public class ChatRoomService {
                 .map(SendResponseDto::of)
                 .toList();
 
-        return ChatResponseDto.of(other, messages, ContactResponseVo.of(contact));
+        return ChatResponseDto.of(other, messages);
     }
 
     //의뢰 만들기
@@ -182,21 +182,24 @@ public class ChatRoomService {
         return ContactResponseDto.of(chatRoom.getChatRoomId());
     }
 
-    public void acceptContact(Long roomId){
+    public ContactStatusResponseDto acceptContact(Long roomId){
 
         //현재 채팅방을 찾음
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
         //채팅방에 연결된 contact를 찾음
         Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
-                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰")
+                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID")
         );
+        Long currentId = SecurityUtil.getCurrentId();
+
+        validateIsMyContact(currentContact, currentId);
 
         //현재 contact의 글 작성자의 상태를 진행중으로 바꿈 -> writer, other 모두 진행중 상태가 됨
         currentContact.changeStatus("writer", ContactStatus.진행중);
 
         //현재 post를 찾음
         Post currentPost = boardRepository.findPostById(currentContact.getPost().getPostId()).orElseThrow(() ->
-                new CustomException(String.valueOf(currentContact.getPost().getPostId()), "존재하지 않는 채팅방ID"));
+                new CustomException(String.valueOf(currentContact.getPost().getPostId()), "존재하지 않는 게시글"));
 
         //같은 postId로 생성된 contact를 찾음 -> 같은 게시글에서 생성된 의뢰들의 상태를 취소로 변경
         List<Contact> findContacts = contactRepository.findContactsByPost(currentPost);
@@ -207,9 +210,11 @@ public class ChatRoomService {
                 findContact.changeStatus("other", ContactStatus.취소);
             }
         }
+
+        return getContactStatus(currentContact, currentId);
     }
 
-    public void cancelContact(Long roomId) {
+    public ContactStatusResponseDto cancelContact(Long roomId) {
 
         //roomId에 연결되어있는 contactId로 contact를 찾음 -> contact의 writer,other의 ContactStatus를 취소로 바꿈
 
@@ -217,32 +222,40 @@ public class ChatRoomService {
 
         Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(() ->
                 new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰"));
+        Long currentId = SecurityUtil.getCurrentId();
+
+        validateIsMyContact(currentContact, currentId);
 
         currentContact.changeStatus("writer", ContactStatus.취소);
         currentContact.changeStatus("other", ContactStatus.취소);
 
         //Todo 상대방에게 의뢰 취소 알림 전달
 
+        return getContactStatus(currentContact, currentId);
     }
 
-    public void finishContact(Long roomId) {
+    public ContactStatusResponseDto finishContact(Long roomId) {
+        // ChatRoom, Contact, currentId 선언 및 초기화
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
         Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
                 () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
         Long currentId = SecurityUtil.getCurrentId();
-        /*Member curretMember = memberRepository.findById(currentId).orElseThrow(
-                () -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));*/
+
+        validateIsMyContact(currentContact, currentId);
+
         // currentId == writer인 경우
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
             currentContact.changeStatus("writer", ContactStatus.완료);
         } else { //currentId == other인 경우
             currentContact.changeStatus("other", ContactStatus.완료);
         }
+
+        return getContactStatus(currentContact, currentId);
     }
 
     public void reviewContact(Long roomId, ReviewRequestDto reviewRequestDto) {
-        // ChatRoom, Contact, other 선언 및 초기화
+        // ChatRoom, Contact, currentId, other 선언 및 초기화
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
         Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
@@ -250,17 +263,22 @@ public class ChatRoomService {
         Long currentId = SecurityUtil.getCurrentId();
         Member other;
 
+        // 내가 writer인 경우, 상대방은 other
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
             if (currentContact.getWriterStatus() != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
             other = currentContact.getOther();
-        } else if (currentId.equals(currentContact.getOther().getMemberId())) {
+        }
+        // 내가 other인 경우, 상대방은 writer
+        else if (currentId.equals(currentContact.getOther().getMemberId())) {
             if (currentContact.getOtherStatus() != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
             other = currentContact.getWriter();
-        } else {
+        }
+        // 내가 해당 의뢰에서 writer도, other도 아닌 경우
+        else {
             throw new CustomException(String.valueOf(currentContact.getContactId()), "나의 의뢰가 아님");
         }
 
@@ -277,5 +295,78 @@ public class ChatRoomService {
                 .build();
 
         reviewRepository.save(review);
+    }
+
+    // 컨트롤러에서 GET /contact/{roomId}/status 로 호출되는 메서드
+    public ContactStatusResponseDto getContactStatus(Long roomId) {
+        //ChatRoom, Contact 초기화
+        ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
+        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
+                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
+        Long currentId = SecurityUtil.getCurrentId();
+        validateIsMyContact(currentContact, currentId);
+
+        return validateStatus(currentContact, currentId);
+    }
+
+    // 수락,취소,완료 메서드에서 호출되는 메서드
+    private ContactStatusResponseDto getContactStatus(Contact currentContact, Long currentId) {
+        return validateStatus(currentContact, currentId);
+    }
+
+    // 실제 검증되는 로직을 구현한 메서드
+    private ContactStatusResponseDto validateStatus(Contact currentContact, Long currentId) {
+        // 나의 상태와 상대방의 상태 초기화
+        ContactStatus myStatus;
+        ContactStatus otherStatus;
+        if (currentId.equals(currentContact.getWriter().getMemberId())) {
+            myStatus = currentContact.getWriterStatus();
+            otherStatus = currentContact.getOtherStatus();
+        } else {
+            myStatus = currentContact.getOtherStatus();
+            otherStatus = currentContact.getWriterStatus();
+        }
+
+        // 둘 중 하나라도 취소된 상태면, 그 의뢰는 취소된 것이다.
+        if (myStatus == ContactStatus.취소 || otherStatus == ContactStatus.취소) {
+            return ContactStatusResponseDto.of(ContactStatus.취소, false);
+        }
+
+        // 만약 내가 대기중이라면, 의뢰 상태는 대기중이며, 수락 버튼을 활성화 해야 한다.
+        if (myStatus == ContactStatus.대기중) {
+            return ContactStatusResponseDto.of(ContactStatus.대기중, true);
+        }
+
+        // 만약 내가 진행중 상태이고
+        if (myStatus == ContactStatus.진행중) {
+            // 상대가 대기중 상태라면, 의뢰 상태는 대기중이며, 수락 버튼을 비활성화 해야 한다.
+            if (otherStatus == ContactStatus.대기중) {
+                return ContactStatusResponseDto.of(ContactStatus.대기중, false);
+            }
+            // 상대가 진행중 이거나 완료한 상태이면, 의뢰 상태는 진행중이며, 완료/취소 버튼을 활성화 해야 한다.
+            else { //otherStatus == ContactStatus.진행중 || otherStatus == ContactStatus.완료
+                return ContactStatusResponseDto.of(ContactStatus.진행중, true);
+            }
+        }
+        // 만약 내가 완료 상태이고
+        else { //meStatus == ContactStatus.완료
+            // 상대가 진행중 상태이면, 의뢰 상태는 진행중이며, 완료/취소 버튼을 비활성화 해야 한다.
+            if (otherStatus == ContactStatus.진행중) {
+                return ContactStatusResponseDto.of(ContactStatus.진행중, false);
+            }
+            // 상대가 완료 상태이면, 의뢰 상태는 완료이며, 완료/취소 버튼을 비활성화 해야 한다.
+            else { //otherStatus == ContactStatus.완료
+                return ContactStatusResponseDto.of(ContactStatus.완료, false);
+            }
+        }
+    }
+
+    // 처리하려는 의뢰가 내가 참여한 의뢰인지 검증하고 아니면 예외를 발생시키는 메서드
+    private void validateIsMyContact(Contact currentContact, Long currentId) {
+        if (!currentId.equals(currentContact.getWriter().getMemberId())
+            && !currentId.equals(currentContact.getOther().getMemberId())) {
+            throw new CustomException(String.valueOf(currentContact), "나의 의뢰가 아님");
+        }
     }
 }
