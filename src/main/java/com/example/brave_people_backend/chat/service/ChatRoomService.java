@@ -192,7 +192,7 @@ public class ChatRoomService {
         );
 
         //현재 contact의 글 작성자의 상태를 진행중으로 바꿈 -> writer, other 모두 진행중 상태가 됨
-        currentContact.changeWriterStatus(ContactStatus.진행중);
+        currentContact.changeStatus("writer", ContactStatus.진행중);
 
         //현재 post를 찾음
         Post currentPost = boardRepository.findPostById(currentContact.getPost().getPostId()).orElseThrow(() ->
@@ -203,8 +203,8 @@ public class ChatRoomService {
         for (Contact findContact : findContacts) {
             //찾은 의뢰ID가 현재 의뢰ID와 다르고, 작성자의 상태가 대기중이면 해당 의뢰에 관련된 member의 상태를 취소로 변경
             if ((!findContact.getContactId().equals(currentContact.getContactId())) && (findContact.getWriterStatus().equals(ContactStatus.대기중))) {
-                findContact.changeWriterStatus(ContactStatus.취소);
-                findContact.changeOtherStatus(ContactStatus.취소);
+                findContact.changeStatus("writer", ContactStatus.취소);
+                findContact.changeStatus("other", ContactStatus.취소);
             }
         }
     }
@@ -218,8 +218,10 @@ public class ChatRoomService {
         Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(() ->
                 new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰"));
 
-        currentContact.changeWriterStatus(ContactStatus.취소);
-        currentContact.changeOtherStatus(ContactStatus.취소);
+        currentContact.changeStatus("writer", ContactStatus.취소);
+        currentContact.changeStatus("other", ContactStatus.취소);
+
+        //Todo 상대방에게 의뢰 취소 알림 전달
 
     }
 
@@ -232,10 +234,10 @@ public class ChatRoomService {
         /*Member curretMember = memberRepository.findById(currentId).orElseThrow(
                 () -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));*/
         // currentId == writer인 경우
-        if (currentId.equals(currentContact.getWriter().getMemberId())) { //TODO client->writer, helper->other로 수정할 것
-            currentContact.changeWriterStatus(ContactStatus.완료);
+        if (currentId.equals(currentContact.getWriter().getMemberId())) {
+            currentContact.changeStatus("writer", ContactStatus.완료);
         } else { //currentId == other인 경우
-            currentContact.changeOtherStatus(ContactStatus.완료);
+            currentContact.changeStatus("other", ContactStatus.완료);
         }
     }
 
@@ -248,8 +250,6 @@ public class ChatRoomService {
         Long currentId = SecurityUtil.getCurrentId();
         Member other;
 
-        //TODO client->writer, helper->other로 수정할 것
-        //
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
             if (currentContact.getWriterStatus() != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");

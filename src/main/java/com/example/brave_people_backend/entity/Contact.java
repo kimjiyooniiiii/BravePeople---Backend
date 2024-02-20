@@ -41,11 +41,12 @@ public class Contact {
     private boolean isDeleted;
 
 
-    public void changeWriterStatus(ContactStatus contactStatus) {
-        this.writerStatus = contactStatus;
-    }
-
-    public void changeOtherStatus(ContactStatus contactStatus) {
-        this.otherStatus = contactStatus;
+    public void changeStatus(String member, ContactStatus status) {
+        if(member.equals("writer")) {
+            this.writerStatus = status;
+        }
+        else {
+            this.otherStatus = status;
+        }
     }
 }
