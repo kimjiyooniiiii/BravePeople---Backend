@@ -128,7 +128,7 @@ public class BoardService {
         }
 
         //해당 게시글에서 진행중인 의뢰가 있으면 삭제하지 못하게 함
-        List<Contact> findContact = contactRepository.findContactOneByStatusAndPostId(findPost.getPostId());
+        List<Contact> findContact = contactRepository.findContactOneByStatusAndPost(findPost);
         if (!findContact.isEmpty()) {
             throw new CustomException(String.valueOf(findPost.getPostId()), "진행중인 의뢰 존재");
         }

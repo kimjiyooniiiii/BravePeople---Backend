@@ -132,20 +132,24 @@ public class ChatRoomService {
         * postMember은 항상 writer, currentMember은 항상 other가 됨
         * */
 
-        List<Contact> findContact = contactRepository.findContactOneByStatusAndPostId(postId);
-        //해당 postId로 진행중인 의뢰가 있으면 오류
-        if (!findContact.isEmpty()) {
-            throw new CustomException(String.valueOf(currentPost.getPostId()), "진행중인 의뢰 존재");
-        }
+        List<Contact> findContact = contactRepository.findContactOneByStatus(postMember, currentMember);
 
         //writer와 other 사이에 진행중인 의뢰가 있으면 오류
-        findContact = contactRepository.findContactOneByStatus(postMember, currentMember);
         if(!findContact.isEmpty()) {
-            throw new CustomException(postMember.getMemberId() + ", " + currentMember.getMemberId(), "진행중인 의뢰 존재");
+            throw new CustomException(postMember.getMemberId() + ", " + currentMember.getMemberId(), "상대방과 진행중인 의뢰 존재");
         }
 
-        //같은 사람이 같은 게시글에 중복해서 부탁하기/달려가기 하면 오류
-        if (contactRepository.existsByWriterAndOtherAndPost(postMember, currentMember, currentPost)) {
+        findContact = contactRepository.findContactOneByStatusAndPost(currentPost);
+        //해당 postId로 진행중인 의뢰가 있으면 오류
+        if (!findContact.isEmpty()) {
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "글 작성자가 의뢰 진행 중");
+        }
+
+        //두 사람 사이에 같은 게시글에서 대기중인 의뢰가 있는지 확인
+        //원정대 게시글 -> 같은 멤버가 대기중/진행중일 땐 중복 부탁/달려가기 안됨, 취소/완료일 땐 가능
+        //진행중인 경우는 위에서 걸러짐
+        //의뢰인 게시글 -> 완료되면 어차피 disable 됨
+        if (contactRepository.existsByWriterAndOtherAndWriterStatusAndOtherStatusAndPost(postMember, currentMember, ContactStatus.대기중, ContactStatus.진행중, currentPost)) {
             throw new CustomException(String.valueOf(currentPost.getPostId()), "의뢰 중복");
         }
 
