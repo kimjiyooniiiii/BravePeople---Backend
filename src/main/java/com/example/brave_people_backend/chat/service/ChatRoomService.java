@@ -3,6 +3,7 @@ package com.example.brave_people_backend.chat.service;
 import com.example.brave_people_backend.board.dto.ContactResponseDto;
 import com.example.brave_people_backend.chat.dto.*;
 import com.example.brave_people_backend.entity.*;
+import com.example.brave_people_backend.enumclass.Act;
 import com.example.brave_people_backend.enumclass.ContactStatus;
 import com.example.brave_people_backend.enumclass.NotificationType;
 import com.example.brave_people_backend.exception.Custom404Exception;
@@ -271,7 +272,13 @@ public class ChatRoomService {
             sendNewStatusAlert(currentContact.getWriter().getMemberId());
         }
 
-        return getContactStatus(currentContact, currentId);
+        //contactStatus가 둘 다 완료이고 의뢰인 게시글이면 비활성화 함
+        ContactStatusResponseDto contactStatus = getContactStatus(currentContact, currentId);
+        if (contactStatus.getStatus().equals(ContactStatus.완료) && currentContact.getPost().getAct().equals(Act.의뢰인)) {
+            currentContact.getPost().onDisabled();
+        }
+
+        return contactStatus;
     }
 
     public void reviewContact(Long roomId, ReviewRequestDto reviewRequestDto) {
@@ -375,7 +382,7 @@ public class ChatRoomService {
             }
         }
         // 만약 내가 완료 상태이고
-        else { //meStatus == ContactStatus.완료
+        else { //myStatus == ContactStatus.완료
             // 상대가 진행중 상태이면, 의뢰 상태는 진행중이며, 완료/취소 버튼을 비활성화 해야 한다.
             if (otherStatus == ContactStatus.진행중) {
                 return ContactStatusResponseDto.of(ContactStatus.진행중, false);

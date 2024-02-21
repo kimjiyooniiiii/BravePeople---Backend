@@ -80,4 +80,8 @@ public class Post {
     public void onDeleted() {
         isDeleted = true;
     }
+
+    public void onDisabled() {
+        isDisabled = true;
+    }
 }

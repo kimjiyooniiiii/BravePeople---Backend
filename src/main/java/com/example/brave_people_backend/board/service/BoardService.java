@@ -4,12 +4,15 @@ import com.example.brave_people_backend.board.dto.PostListResponseDto;
 import com.example.brave_people_backend.board.dto.PostListVo;
 import com.example.brave_people_backend.board.dto.PostRequestDto;
 import com.example.brave_people_backend.board.dto.PostResponseDto;
+import com.example.brave_people_backend.entity.Contact;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
 import com.example.brave_people_backend.enumclass.Act;
+import com.example.brave_people_backend.enumclass.ContactStatus;
 import com.example.brave_people_backend.exception.Custom404Exception;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.BoardRepository;
+import com.example.brave_people_backend.repository.ContactRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +32,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final ContactRepository contactRepository;
 
     // 글 목록 불러오기
     @Transactional(readOnly = true)
@@ -120,6 +125,19 @@ public class BoardService {
 
         if (findPost.isDeleted()) {
             throw new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글");
+        }
+
+        //해당 게시글에서 진행중인 의뢰가 있으면 삭제하지 못하게 함
+        List<Contact> findContact = contactRepository.findContactOneByStatusAndPostId(findPost.getPostId());
+        if (!findContact.isEmpty()) {
+            throw new CustomException(String.valueOf(findPost.getPostId()), "진행중인 의뢰 존재");
+        }
+
+        //현재 Post와 관련된 의뢰 취소하기
+        List<Contact> contacts = contactRepository.findContactsByPost(findPost);
+        for (Contact contact : contacts) {
+            contact.changeStatus("writer", ContactStatus.취소);
+            contact.changeStatus("other", ContactStatus.취소);
         }
 
         findPost.onDeleted();
