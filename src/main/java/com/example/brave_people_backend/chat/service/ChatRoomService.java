@@ -12,7 +12,6 @@ import com.example.brave_people_backend.repository.*;
 import com.example.brave_people_backend.security.SecurityUtil;
 import com.example.brave_people_backend.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -58,15 +58,13 @@ public class ChatRoomService {
         // 결과값으로 반환할 List<ChatRoomResponseVo> 초기화
         List<ChatRoomResponseVo> result = new ArrayList<>();
 
-        // lastChat은 딱 하나 가져오는 것이므로 pageable 구현 객체 초기화
-        PageRequest pageRequest = PageRequest.of(0, 1); //출력할 page와 amount (pageable 구현체)
         // 내가 참여한 채팅방 iter 순회
         for (ChatRoom chatRoom : chatRoomList) {
             // 멤버(상대방) 초기화
             Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
 
-            // 마지막 채팅을 List<Chat> 형태로 받아옴
-            Chat lastChat = chatRepository.findChatOneByRoomId(chatRoom.getChatRoomId(), pageRequest).get(0);
+            // 마지막 채팅을 받아옴
+            Chat lastChat = chatRepository.findTopByRoomId(chatRoom.getChatRoomId());
 
             //마지막 메시지가 사진이면 message를 "사진을 보냈습니다."로 설정
             if (lastChat.getMessage() == null) {
@@ -100,11 +98,13 @@ public class ChatRoomService {
         Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
 
         // 최근 채팅데이터 300개를 불러와 List<Chat>에 넣고 List<SendResponseDto>로 변환
-        PageRequest pageRequest = PageRequest.of(0, 300);
-        List<SendResponseDto> messages = chatRepository.findByRoomId(roomId, pageRequest)
+        List<SendResponseDto> messages = chatRepository.findTop300ByRoomId(roomId)
                 .stream()
                 .map(SendResponseDto::of)
-                .toList();
+                .collect( // 리스트로 바꾸고 컬렉션을 반전하여 리스트 반환
+                        Collectors.collectingAndThen(Collectors.toList(),
+                                list -> {Collections.reverse(list); return list;})
+                );
 
         return ChatResponseDto.of(other, messages);
     }
