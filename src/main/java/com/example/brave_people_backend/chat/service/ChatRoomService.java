@@ -150,7 +150,7 @@ public class ChatRoomService {
         //진행중인 경우는 위에서 걸러짐
         //의뢰인 게시글 -> 완료되면 어차피 disable 됨
         if (contactRepository.existsByWriterAndOtherAndWriterStatusAndOtherStatusAndPost(postMember, currentMember, ContactStatus.대기중, ContactStatus.진행중, currentPost)) {
-            throw new CustomException(String.valueOf(currentPost.getPostId()), "의뢰 중복");
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "이미 신청한 의뢰");
         }
 
         //의뢰가 진행 가능한 상태이면 새 contact 생성
