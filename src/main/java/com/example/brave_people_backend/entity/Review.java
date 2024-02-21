@@ -32,4 +32,8 @@ public class Review {
     @ColumnDefault("false")
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     private boolean isDisabled;
+
+    public void changeIsDisabled(boolean isDisabled) {
+        this.isDisabled = isDisabled;
+    }
 }

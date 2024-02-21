@@ -211,6 +211,9 @@ public class ChatRoomService {
             }
         }
 
+        // 상대방에게 상태가 변화되었다는 알림을 보냄
+        sendNewStatusAlert(currentContact.getOther().getMemberId());
+
         return getContactStatus(currentContact, currentId);
     }
 
@@ -229,7 +232,14 @@ public class ChatRoomService {
         currentContact.changeStatus("writer", ContactStatus.취소);
         currentContact.changeStatus("other", ContactStatus.취소);
 
-        //Todo 상대방에게 의뢰 취소 알림 전달
+        // 내가 writer면, 알림 받는 사람은 other
+        if (currentId.equals(currentContact.getWriter().getMemberId())) {
+            sendNewStatusAlert(currentContact.getOther().getMemberId());
+        }
+        // 내가 other면, 알림 받는 사람은 writer
+        else {
+            sendNewStatusAlert(currentContact.getWriter().getMemberId());
+        }
 
         return getContactStatus(currentContact, currentId);
     }
@@ -247,8 +257,18 @@ public class ChatRoomService {
         // currentId == writer인 경우
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
             currentContact.changeStatus("writer", ContactStatus.완료);
+            // writer, other 둘 다 완료 상태인 경우 기존 후기 활성화
+            if (currentContact.getOtherStatus() == ContactStatus.완료) {
+                reviewRepository.findByContact(currentContact).forEach(r -> r.changeIsDisabled(false));
+            }
+            sendNewStatusAlert(currentContact.getOther().getMemberId());
         } else { //currentId == other인 경우
             currentContact.changeStatus("other", ContactStatus.완료);
+            // writer, other 둘 다 완료 상태인 경우 기존 후기 활성화
+            if (currentContact.getWriterStatus() == ContactStatus.완료) {
+                reviewRepository.findByContact(currentContact).forEach(r -> r.changeIsDisabled(false));
+            }
+            sendNewStatusAlert(currentContact.getWriter().getMemberId());
         }
 
         return getContactStatus(currentContact, currentId);
@@ -262,17 +282,19 @@ public class ChatRoomService {
                 () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
         Long currentId = SecurityUtil.getCurrentId();
         Member other;
+        ContactStatus writerStatus = currentContact.getWriterStatus();
+        ContactStatus otherStatus = currentContact.getOtherStatus();
 
         // 내가 writer인 경우, 상대방은 other
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
-            if (currentContact.getWriterStatus() != ContactStatus.완료) {
+            if (writerStatus != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
             other = currentContact.getOther();
         }
         // 내가 other인 경우, 상대방은 writer
         else if (currentId.equals(currentContact.getOther().getMemberId())) {
-            if (currentContact.getOtherStatus() != ContactStatus.완료) {
+            if (otherStatus != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
             other = currentContact.getWriter();
@@ -286,12 +308,15 @@ public class ChatRoomService {
             throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 리뷰 존재");
         }
 
+        // writerStatus와 otherStatus가 모두 완료일 때만, review의 비활성화 여부는 false
+        boolean isDisabled = !(writerStatus == ContactStatus.완료 && otherStatus == ContactStatus.완료);
+
         Review review = Review.builder()
                 .member(other)
                 .contact(currentContact)
                 .score(reviewRequestDto.getScore())
                 .contents((reviewRequestDto.getContents()))
-                .isDisabled(false)
+                .isDisabled(isDisabled)
                 .build();
 
         reviewRepository.save(review);
@@ -368,5 +393,10 @@ public class ChatRoomService {
             && !currentId.equals(currentContact.getOther().getMemberId())) {
             throw new CustomException(String.valueOf(currentContact), "나의 의뢰가 아님");
         }
+    }
+
+    // SSE로 NEW_STATUS 알림을 보내는 메서드
+    private void sendNewStatusAlert(Long receiverId) {
+        sseService.sendEventToClient(NotificationType.NEW_STATUS, receiverId, null);
     }
 }
