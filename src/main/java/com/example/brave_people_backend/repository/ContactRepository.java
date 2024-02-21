@@ -22,7 +22,9 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
     List<Contact> findContactOneByStatus(@Param("writer") Member writer,
                                          @Param("other") Member other);
     //해당 postId로 진행중인 의뢰가 있는지 조회
-    @Query("select c from Contact c where c.post.postId = :postId and c.writerStatus = '진행중' and c.otherStatus = '진행중'")
+    @Query("select c from Contact c where c.post.postId = :postId and (c.writerStatus = '진행중' and c.otherStatus = '진행중')" +
+            "or (c.writerStatus = '진행중' and c.otherStatus = '완료')" +
+            "or c.writerStatus = '완료' and c.otherStatus = '진행중'")
     List<Contact> findContactOneByStatusAndPostId(@Param("postId") Long postId);
 
     //현재 post에서 생성된 의뢰 조회
