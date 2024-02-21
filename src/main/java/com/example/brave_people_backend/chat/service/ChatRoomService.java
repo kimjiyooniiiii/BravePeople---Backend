@@ -71,7 +71,8 @@ public class ChatRoomService {
                 lastChat.setMessageWhenImage("사진을 보냈습니다.");
             }
             //채팅방, 상대방, 마지막 채팅을 파라미터로 넘겨주고 result 리스트에 추가
-            result.add(ChatRoomResponseVo.of(chatRoom, other, lastChat));
+            result.add(ChatRoomResponseVo.of(chatRoom, other, lastChat,
+                    getContactStatus(chatRoom.getContact(), currentId).getStatus()));
         }
         //마지막 채팅 최신순으로 정렬
         Collections.sort(result);
@@ -188,9 +189,7 @@ public class ChatRoomService {
         //현재 채팅방을 찾음
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
         //채팅방에 연결된 contact를 찾음
-        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
-                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID")
-        );
+        Contact currentContact = currentRoom.getContact();
         Long currentId = SecurityUtil.getCurrentId();
 
         validateIsMyContact(currentContact, currentId);
@@ -223,9 +222,7 @@ public class ChatRoomService {
         //roomId에 연결되어있는 contactId로 contact를 찾음 -> contact의 writer,other의 ContactStatus를 취소로 바꿈
 
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
-
-        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(() ->
-                new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰"));
+        Contact currentContact = currentRoom.getContact();
         Long currentId = SecurityUtil.getCurrentId();
 
         validateIsMyContact(currentContact, currentId);
@@ -249,8 +246,7 @@ public class ChatRoomService {
         // ChatRoom, Contact, currentId 선언 및 초기화
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
-        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
-                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
+        Contact currentContact = currentRoom.getContact();
         Long currentId = SecurityUtil.getCurrentId();
 
         validateIsMyContact(currentContact, currentId);
@@ -285,8 +281,7 @@ public class ChatRoomService {
         // ChatRoom, Contact, currentId, other 선언 및 초기화
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
-        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
-                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
+        Contact currentContact = currentRoom.getContact();
         Long currentId = SecurityUtil.getCurrentId();
         Member other;
         ContactStatus writerStatus = currentContact.getWriterStatus();
@@ -315,7 +310,7 @@ public class ChatRoomService {
             throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 리뷰 존재");
         }
 
-        // writerStatus와 otherStatus가 모두 완료일 때만, review의 비활성화 여부는 false
+        // writerStatus와 otherStatus가 모두 완료일 때만 false
         boolean isDisabled = !(writerStatus == ContactStatus.완료 && otherStatus == ContactStatus.완료);
 
         Review review = Review.builder()
@@ -334,8 +329,7 @@ public class ChatRoomService {
         //ChatRoom, Contact 초기화
         ChatRoom currentRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
-        Contact currentContact = contactRepository.findById(currentRoom.getContact().getContactId()).orElseThrow(
-                () -> new CustomException(String.valueOf(currentRoom.getContact().getContactId()), "존재하지 않는 의뢰ID"));
+        Contact currentContact = currentRoom.getContact();
         Long currentId = SecurityUtil.getCurrentId();
         validateIsMyContact(currentContact, currentId);
 
