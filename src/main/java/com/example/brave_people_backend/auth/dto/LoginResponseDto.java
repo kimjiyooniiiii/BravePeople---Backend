@@ -24,9 +24,7 @@ public class LoginResponseDto {
 
     private List<Long> chatRooms;
 
-    private Boolean isRead;
-
-    public static LoginResponseDto of(Member member, List<Long> chatRooms, TokenDto tokenDto, boolean isRead) {
+    public static LoginResponseDto of(Member member, List<Long> chatRooms, TokenDto tokenDto) {
         return LoginResponseDto.builder()
                 .memberId(member.getMemberId().toString())
                 .nickname(member.getNickname())
@@ -35,7 +33,6 @@ public class LoginResponseDto {
                 .profileImg(member.getProfileImg())
                 .tokenDto(tokenDto)
                 .chatRooms(chatRooms)
-                .isRead(isRead)
                 .build();
     }
 }

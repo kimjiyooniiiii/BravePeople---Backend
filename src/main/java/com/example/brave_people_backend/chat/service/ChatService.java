@@ -58,8 +58,6 @@ public class ChatService {
             } else {
                 chatRoom.changeBIsRead(true);
             }
-
-            chatRoom.changeCountPlus();
         }
         // 채팅 메시지 전송 Logic
         else {
@@ -77,13 +75,11 @@ public class ChatService {
             sseService.sendEventToClient(NotificationType.NEW_CHAT, other.getMemberId(), me.getNickname()+"님이 메시지를 보냈습니다.");
 
             // 현재 상대방이 오프라인이면 상대방의 채팅 읽음 여부를 false로 변경
-            if(chatRoom.getCount() == 1) {
                 if(chatRoom.getMemberA() == other) {
                     chatRoom.changeAIsRead(false);
                 } else {
                     chatRoom.changeBIsRead(false);
                 }
-            }
         }
 
     }
@@ -94,18 +90,20 @@ public class ChatService {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         Long userId = Long.parseLong(headerAccessor.getSessionAttributes().get("userId").toString());
         Long roomId = Long.parseLong(headerAccessor.getSessionAttributes().get("roomId").toString());
-        
-        // 채팅방 DB의 읽음 처리 false -> true
+
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(()->new CustomException(String.valueOf(roomId),"존재하지 않는 채팅방ID"));
 
-        // 채팅 읽기 여부, 읽음 처리
-        if(chatRoom.getMemberA().getMemberId().equals(userId)) {
-            chatRoom.changeAIsRead(true);
-        } else if(chatRoom.getMemberB().getMemberId().equals(userId)) {
-            chatRoom.changeBIsRead(true);
-        }
+        String identity = "A";
+        if(chatRoom.getMemberB().getMemberId().equals(userId)) { identity = "B"; }
 
-        chatRoom.changeCountMinus();
+        // 연결 해제 전, 마지막 읽은 메시지 ID를 chatRoom 테이블에 저장
+        String lastChatId = chatRepository.findTopByRoomId(roomId).getId();
+
+        if (identity.equals("A")) {
+            chatRoom.changeALastReadId(lastChatId);
+        } else {
+            chatRoom.changeBLastReadId(lastChatId);
+        }
     }
 }

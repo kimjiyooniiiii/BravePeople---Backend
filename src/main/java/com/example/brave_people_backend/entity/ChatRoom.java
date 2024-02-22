@@ -57,8 +57,9 @@ public class ChatRoom {
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     private boolean bIsRead;
 
-    @ColumnDefault("0")
-    private int count;          // 실시간 참여자 수
+    private String aLastReadId;       // A가 마지막으로 읽은 채팅 메시지의 ID
+
+    private String bLastReadId;       // B가 마지막으로 읽은 채팅 메시지의 ID
 
     public void changeContact(Contact contact) {
         this.contact = contact;
@@ -68,9 +69,9 @@ public class ChatRoom {
 
     public void changeBIsRead(boolean bIsRead) { this.bIsRead = bIsRead; }
 
-    public void changeCountPlus() { this.count += 1; }
+    public void changeALastReadId(String chatId) { this.aLastReadId = chatId; }
 
-    public void changeCountMinus() { this.count -= 1; }
+    public void changeBLastReadId(String chatId) { this.bLastReadId = chatId; }
 
     // A와 B의 참여 여부를 true 혹은 false로 업데이트
     public void changeIsPartIn(String identity, boolean isPartIn) {

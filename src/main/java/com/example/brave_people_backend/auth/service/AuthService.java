@@ -99,21 +99,13 @@ public class AuthService {
         // 내가 참여중인 채팅방 리스트
         List<ChatRoom> chatRooms = chatRoomRepository.findChatRoomByMemberId(Long.parseLong(authenticate.getName()));
         List<Long> roomNum = new ArrayList<>();
-        boolean isRead = true;
 
         for(ChatRoom r : chatRooms) {
             // 채팅방 번호만 저장
             roomNum.add(r.getChatRoomId());
-            // A,B 중 해당하는 객체의 읽기여부 확인
-            String identity = r.getMemberA().getMemberId().equals(member.getMemberId()) ? "A" : "B";
-            if(identity.equals("A") && r.isAIsRead() == false) {
-                isRead = false;
-            } else if(identity.equals("B") && r.isBIsRead() == false) {
-                isRead = false;
-            }
         }
 
-        return LoginResponseDto.of(member, roomNum, tokenDto, isRead);
+        return LoginResponseDto.of(member, roomNum, tokenDto);
     }
 
     // refresh token으로 access token 재발급 받기
