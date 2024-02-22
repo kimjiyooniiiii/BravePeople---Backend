@@ -240,7 +240,7 @@ public class ChatRoomService {
 
         //이미 완료한 의뢰를 다시 진행시키지 못하게
         ContactStatus myStatus = currentContact.getWriter().getMemberId().equals(currentId) ? currentContact.getWriterStatus() : currentContact.getOtherStatus();
-        if (myStatus == ContactStatus.진행중) {
+        if (myStatus == ContactStatus.완료) {
             throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 완료한 의뢰");
         }
 
@@ -341,7 +341,7 @@ public class ChatRoomService {
                 () -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
         Contact currentContact = currentRoom.getContact();
         Long currentId = SecurityUtil.getCurrentId();
-        Member other;
+        Member me, other;
         ContactStatus writerStatus = currentContact.getWriterStatus();
         ContactStatus otherStatus = currentContact.getOtherStatus();
 
@@ -350,6 +350,7 @@ public class ChatRoomService {
             if (writerStatus != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
+            me = currentContact.getWriter();
             other = currentContact.getOther();
         }
         // 내가 other인 경우, 상대방은 writer
@@ -357,6 +358,7 @@ public class ChatRoomService {
             if (otherStatus != ContactStatus.완료) {
                 throw new CustomException(String.valueOf(currentContact.getContactId()), "미완료된 의뢰");
             }
+            me = currentContact.getOther();
             other = currentContact.getWriter();
         }
         // 내가 해당 의뢰에서 writer도, other도 아닌 경우
@@ -373,6 +375,7 @@ public class ChatRoomService {
 
         Review review = Review.builder()
                 .member(other)
+                .writer(me)
                 .contact(currentContact)
                 .score(reviewRequestDto.getScore())
                 .contents((reviewRequestDto.getContents()))
