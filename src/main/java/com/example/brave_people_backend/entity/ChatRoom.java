@@ -71,4 +71,13 @@ public class ChatRoom {
     public void changeCountPlus() { this.count += 1; }
 
     public void changeCountMinus() { this.count -= 1; }
+
+    // A와 B의 참여 여부를 true 혹은 false로 업데이트
+    public void changeIsPartIn(String identity, boolean isPartIn) {
+        if(identity.equals("A")) {
+            this.aIsPartIn = isPartIn;
+        } else {
+            this.bIsPartIn = isPartIn;
+        }
+    }
 }

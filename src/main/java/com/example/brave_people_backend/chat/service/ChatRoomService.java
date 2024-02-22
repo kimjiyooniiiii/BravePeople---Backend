@@ -12,6 +12,7 @@ import com.example.brave_people_backend.repository.*;
 import com.example.brave_people_backend.security.SecurityUtil;
 import com.example.brave_people_backend.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ChatRoomService {
 
+    private final SimpMessageSendingOperations template;
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
     private final ChatRepository chatRepository;
@@ -417,5 +420,73 @@ public class ChatRoomService {
     // SSE로 NEW_STATUS 알림을 보내는 메서드
     private void sendNewStatusAlert(Long receiverId, Long roomId) {
         sseService.sendEventToClient(NotificationType.NEW_STATUS, receiverId, String.valueOf(roomId));
+    }
+
+    // 채팅방 나가기
+    public void exitChatRoom(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(roomId.toString(), "존재하지 않는 채팅방ID"));
+
+        // 현재 로그인 한 회원의 ID
+        Long currentId = SecurityUtil.getCurrentId();
+
+        String identity, nickName;
+        Long opponentId;
+
+        // 채팅방 테이블에서 내가 A이면
+        if(chatRoom.getMemberA().getMemberId().equals(currentId)) {
+            identity = "A";
+            nickName = chatRoom.getMemberA().getNickname();
+            opponentId = chatRoom.getMemberB().getMemberId();
+        }
+        // 채팅방 테이블에서 내가 B이면
+        else if(chatRoom.getMemberB().getMemberId().equals(currentId)) {
+            identity = "B";
+            nickName = chatRoom.getMemberB().getNickname();
+            opponentId = chatRoom.getMemberA().getMemberId();
+        }
+        else{
+            throw new CustomException(currentId.toString(), "채팅방 참여자가 아님");
+        }
+
+        // 의뢰 테이블에서 나의 "의뢰상태" 검색
+        String name = "writer";
+        if(chatRoom.getContact().getOther().getMemberId().equals(currentId)) { name = "other"; }
+
+        ContactStatus status = name.equals("writer") ? chatRoom.getContact().getWriterStatus() : chatRoom.getContact().getOtherStatus();
+
+        // 나의 의뢰가 이미 "완료된 상태"가 아니면 의뢰상태를 "취소"로 바꿈
+        if(!status.equals(ContactStatus.완료)) {
+            chatRoom.getContact().changeStatus(name, ContactStatus.취소);
+        }
+
+        // 채팅방 삭제를 위한 상대방의 참여여부 확인
+        boolean isOtherPartIn = identity.equals("A") ? chatRoom.isBIsPartIn() : chatRoom.isAIsPartIn();
+
+        // 상대방도 참여중이지 않으면 채팅방과 메시지 모두 삭제
+        if(isOtherPartIn == false) {
+            chatRepository.deleteByRoomId(roomId);
+            chatRoomRepository.deleteById(roomId);
+        }
+
+        // 상대방은 참여중이면
+        else{
+            // 나의 참여여부만 false로 업데이트
+            chatRoom.changeIsPartIn(identity, false);
+
+            // 상대방에게 채팅방을 나갔음을 메시지로 전송
+            Chat chat = Chat.builder()
+                    .id(UUID.randomUUID().toString())
+                    .roomId(roomId)
+                    .senderId(-1L)
+                    .message(nickName + "님이 채팅방을 나갔습니다.")
+                    .url(null)
+                    .build();
+
+            template.convertAndSend("/sub/" + roomId, SendResponseDto.of(chatRepository.save(chat)));
+
+            // 상대방의 "의뢰 상태" 변화를 알림
+            sendNewStatusAlert(opponentId, roomId);
+        }
     }
 }

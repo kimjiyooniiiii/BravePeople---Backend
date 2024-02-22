@@ -54,4 +54,8 @@ public class ChatRoomController {
     public ContactStatusResponseDto getContactStatus(@PathVariable("roomId") Long roomId) {
         return chatRoomService.getContactStatus(roomId);
     }
+
+    // 채팅방 나가기
+    @PatchMapping("/chats/{roomId}")
+    public void exitChatRoom(@PathVariable("roomId") Long roomId) { chatRoomService.exitChatRoom(roomId); }
 }

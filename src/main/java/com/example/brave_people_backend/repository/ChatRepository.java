@@ -18,4 +18,6 @@ public interface ChatRepository extends MongoRepository<Chat, String> {
     @Query(sort = "{send_at:-1}")
     Chat findTopByRoomId(Long roomId);
 
+    // 채팅 메시지 삭제
+    void deleteByRoomId(Long roomId);
 }
