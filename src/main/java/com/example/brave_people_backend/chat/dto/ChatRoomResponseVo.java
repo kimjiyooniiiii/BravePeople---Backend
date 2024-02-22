@@ -23,7 +23,7 @@ public class ChatRoomResponseVo implements Comparable<ChatRoomResponseVo> {
     private ContactStatus status;
     private LocalDateTime time;
 
-    public static ChatRoomResponseVo of(ChatRoom chatRoom, Member other, Chat chat, ContactStatus contactStatus) {
+    public static ChatRoomResponseVo of(ChatRoom chatRoom, Member other, Chat chat, boolean isRead, ContactStatus contactStatus) {
         return ChatRoomResponseVo.builder()
                 .roomId(chatRoom.getChatRoomId())
                 .lastChat(chat.getMessage())
@@ -32,7 +32,7 @@ public class ChatRoomResponseVo implements Comparable<ChatRoomResponseVo> {
                 .otherNickname(other.getNickname())
                 .otherId(other.getMemberId())
                 //상대방이 A면, 나는 B이므로 B의 읽음 여부 반환, 반대 경우도 마찬가지
-                .isRead(other == chatRoom.getMemberA() ? chatRoom.isBIsRead() : chatRoom.isAIsRead())
+                .isRead(isRead)
                 .status(contactStatus)
                 .time(chat.getSendAt())
                 .build();

@@ -50,6 +50,8 @@ public class MemberService {
     // 프로필 페이지
     @Transactional(readOnly = true)
     public ProfileResponseDto getProfileInfo(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new CustomException(String.valueOf(memberId), "존재하지 않는 멤버ID"));
         Sort sort = Sort.by(Sort.Direction.DESC, "postId"); //POST 테이블의 post_id 기준 내림차순 정렬 설정
         PageRequest pageRequest = PageRequest.of(0, 5, sort); //출력할 page와 amount 및 sort 기준 설정 (pageable 구현체)
 
@@ -72,8 +74,7 @@ public class MemberService {
         }
         score /= reviews.size();
 
-        return ProfileResponseDto.of(memberRepository.findById(memberId).orElseThrow(
-                () -> new CustomException(String.valueOf(memberId), "존재하지 않는 멤버ID")),
+        return ProfileResponseDto.of(member,
                 boardRepository.findPostListByProfilePage(memberId, pageRequest).map(PostListVo::of).toList(),
                 Math.round(score*10)/10.0, recentReviews
         );

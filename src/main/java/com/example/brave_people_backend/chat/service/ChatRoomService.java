@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,37 +46,50 @@ public class ChatRoomService {
         return chatRoomRepository.save(chatRoom);
     }
 
-    // TODO 참여중인 채팅방만 불러오도록 추가해야 함
     // 채팅방 리스트 불러오기
     public List<ChatRoomResponseVo> getChatRoomList() {
         // 멤버(나) 초기화
         Long currentId = SecurityUtil.getCurrentId();
         Member me = memberRepository.findById(currentId)
                 .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
-        // 내가 참여한 채팅방 리스트 초기화
-        List<ChatRoom> chatRoomList = chatRoomRepository.getChatRoomList(me);
+
         // 결과값으로 반환할 List<ChatRoomResponseVo> 초기화
-        List<ChatRoomResponseVo> result = new ArrayList<>();
+        List<ChatRoomResponseVo> chatRooms = chatRoomRepository.getChatRoomList(me)
+                .stream()
+                .map(chatRoom -> {
+                    // 마지막 채팅 초기화
+                    Chat lastChat = chatRepository.findTopByRoomId(chatRoom.getChatRoomId());
+                    Member other;
+                    boolean isRead;
+                    // A가 나면서, A가 채팅방에 참여한 경우
+                    if (chatRoom.getMemberA() == me && chatRoom.isAIsPartIn()) {
+                        other = chatRoom.getMemberB(); //B가 상대
+                        isRead = lastChat.getId().equals(chatRoom.getALastReadId());
+                    }
+                    // B가 나면서, B가 채팅방에 참여한 경우
+                    else if (chatRoom.getMemberB() == me && chatRoom.isBIsPartIn()) {
+                        other = chatRoom.getMemberA(); //A가 상대
+                        isRead = lastChat.getId().equals(chatRoom.getBLastReadId());
+                    }
+                    // 채팅방에 참여하지 않은 경우
+                    else {
+                        return null;
+                    }
 
-        // 내가 참여한 채팅방 iter 순회
-        for (ChatRoom chatRoom : chatRoomList) {
-            // 멤버(상대방) 초기화
-            Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
+                    //마지막 메시지가 사진이면 message를 "사진을 보냈습니다."로 설정
+                    if (lastChat.getMessage() == null) {
+                        lastChat.setMessageWhenImage("사진을 보냈습니다.");
+                    }
 
-            // 마지막 채팅을 받아옴
-            Chat lastChat = chatRepository.findTopByRoomId(chatRoom.getChatRoomId());
+                    //채팅방, 상대방, 마지막 채팅, 읽음여부, 상태를 파라미터로 넘겨주고 결과에 추가
+                    return ChatRoomResponseVo.of(chatRoom, other, lastChat, isRead,
+                            getContactStatus(chatRoom.getContact(), currentId).getStatus());
+                })
+                .filter(Objects::nonNull) //내가 채팅방에 참여하지 않은 경우(null) stream에서 제외
+                .sorted()  // 마지막 채팅 최신순으로 정렬
+                .toList(); // 리스트로 변환
 
-            //마지막 메시지가 사진이면 message를 "사진을 보냈습니다."로 설정
-            if (lastChat.getMessage() == null) {
-                lastChat.setMessageWhenImage("사진을 보냈습니다.");
-            }
-            //채팅방, 상대방, 마지막 채팅을 파라미터로 넘겨주고 result 리스트에 추가
-            result.add(ChatRoomResponseVo.of(chatRoom, other, lastChat,
-                    getContactStatus(chatRoom.getContact(), currentId).getStatus()));
-        }
-        //마지막 채팅 최신순으로 정렬
-        Collections.sort(result);
-        return result;
+        return chatRooms;
     }
 
     //기존 채팅내역 불러오기
@@ -90,19 +100,27 @@ public class ChatRoomService {
                 .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(String.valueOf(roomId), "존재하지 않는 채팅방ID"));
-        Contact contact = contactRepository.findById(chatRoom.getContact().getContactId())
-                .orElseThrow(() -> new CustomException(String.valueOf(chatRoom.getChatRoomId()), "존재하지 않는 의뢰ID"));
 
         // 채팅방 참여자가 아닌 경우 예외 발생
         if (chatRoom.getMemberA() != me && chatRoom.getMemberB() != me) {
             throw new CustomException(String.valueOf(roomId), "채팅방 참여자가 아님");
         }
 
-        // 멤버(상대방) 초기화
-        Member other = chatRoom.getMemberA() == me ? chatRoom.getMemberB() : chatRoom.getMemberA();
+        Member other;
+        LocalDateTime myEnteredAt; // 나의 입장 시각
+        // A가 나면
+        if (chatRoom.getMemberA() == me) {
+            other = chatRoom.getMemberB(); // B는 상대방
+            myEnteredAt = chatRoom.getAEnteredAt(); // A(나)의 입장 시각
+        }
+        // B가 나면
+        else {
+            other = chatRoom.getMemberA(); // A는 상대방
+            myEnteredAt = chatRoom.getBEnteredAt(); // B(나)의 입장 시각
+        }
 
         // 최근 채팅데이터 300개를 불러와 List<Chat>에 넣고 List<SendResponseDto>로 변환
-        List<SendResponseDto> messages = chatRepository.findTop300ByRoomId(roomId)
+        List<SendResponseDto> messages = chatRepository.findTop300ByRoomId(roomId, myEnteredAt)
                 .stream()
                 .map(SendResponseDto::of)
                 .collect( // 리스트로 바꾸고 컬렉션을 반전하여 리스트 반환
@@ -300,10 +318,18 @@ public class ChatRoomService {
             sendNewStatusAlert(currentContact.getWriter().getMemberId(), currentRoom.getChatRoomId());
         }
 
-        //contactStatus가 둘 다 완료이고 의뢰인 게시글이면 비활성화 함
+        // contactStatus가 둘 다 완료인 경우 뱃지 개수를 +1 함
         ContactStatusResponseDto contactStatus = getContactStatus(currentContact, currentId);
-        if (contactStatus.getStatus().equals(ContactStatus.완료) && currentContact.getPost().getAct().equals(Act.의뢰인)) {
-            currentContact.getPost().onDisabled();
+        if (contactStatus.getStatus().equals(ContactStatus.완료)) {
+            //contactStatus가 둘 다 완료이고 의뢰인 게시글이면 비활성화 하고 other(원정대)의 뱃지를 +1
+            if (currentContact.getPost().getAct().equals(Act.의뢰인)) {
+                currentContact.getPost().onDisabled();
+                currentContact.getOther().plusMedalCount();
+            }
+            //contactStatus가 둘 다 완료이고 원정대 게시글이면 writer(원정대)의 뱃지를 +1
+            else {
+                currentContact.getWriter().plusMedalCount();
+            }
         }
 
         return contactStatus;

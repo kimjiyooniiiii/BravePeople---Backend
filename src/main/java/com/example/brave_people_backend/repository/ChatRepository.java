@@ -5,14 +5,15 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface ChatRepository extends MongoRepository<Chat, String> {
 
     //보낸시각 최신순 정렬 후 채팅 300개 가져오기
-    @Query(sort = "{send_at:-1}")
-    List<Chat> findTop300ByRoomId(Long roomId);
+    @Query(value = "{send_at: {$gte: ?1}}", sort = "{send_at:-1}")
+    List<Chat> findTop300ByRoomId(Long roomId, LocalDateTime enteredAt);
 
     //보낸시각 최신순 정렬 후 채팅 1개 가져오기
     @Query(sort = "{send_at:-1}")

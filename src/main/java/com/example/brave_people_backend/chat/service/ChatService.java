@@ -51,13 +51,6 @@ public class ChatService {
             // WebSocket Session에 userId, roomId 저장
             headerAccessor.getSessionAttributes().put("userId", sendRequestDto.getSenderId());
             headerAccessor.getSessionAttributes().put("roomId", roomId);
-
-            // 채팅 읽기 여부, 읽음 처리
-            if(chatRoom.getMemberA() == me) {
-                chatRoom.changeAIsRead(true);
-            } else {
-                chatRoom.changeBIsRead(true);
-            }
         }
         // 채팅 메시지 전송 Logic
         else {
@@ -73,13 +66,6 @@ public class ChatService {
 
             //받는 사람에게 sse로 알림 전송, TALK일 때만 알림 전송
             sseService.sendEventToClient(NotificationType.NEW_CHAT, other.getMemberId(), me.getNickname()+"님이 메시지를 보냈습니다.");
-
-            // 현재 상대방이 오프라인이면 상대방의 채팅 읽음 여부를 false로 변경
-                if(chatRoom.getMemberA() == other) {
-                    chatRoom.changeAIsRead(false);
-                } else {
-                    chatRoom.changeBIsRead(false);
-                }
         }
 
     }

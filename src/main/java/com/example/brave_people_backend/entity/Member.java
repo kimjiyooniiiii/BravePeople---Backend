@@ -83,4 +83,8 @@ public class Member {
         this.introduction = updateProfileInfoRequestDto.getIntroduction();
         this.profileImg = updateProfileInfoRequestDto.getProfileImg();
     }
+
+    public void plusMedalCount() {
+        this.medalCount++;
+    }
 }
