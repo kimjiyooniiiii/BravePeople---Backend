@@ -169,8 +169,6 @@ public class ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findChatRoom(postMember, currentMember)
                 .orElseGet(() -> {
                     ChatRoom newRoom = createChatRoom(postMember, currentMember);
-                    //새로 생성된 채팅방에 대한 알림을 전송
-                    sseService.sendEventToClient(NotificationType.NEW_CHAT_ROOM, postMember.getMemberId(), currentMember.getNickname()+"님이 채팅방을 개설하였습니다.");
                     //빈 채팅 생성 후 save
                     Chat makeChat = Chat.builder()
                             .senderId(-1L)
@@ -184,6 +182,9 @@ public class ChatRoomService {
                     return newRoom;
                 });
         chatRoom.changeContact(contact);
+
+        //글 작성자에게 새 의뢰가 생성됨을 알림
+        sseService.sendEventToClient(NotificationType.NEW_CONTACT, postMember.getMemberId(), "새로운 의뢰 생성");
 
         return ContactResponseDto.of(chatRoom.getChatRoomId());
     }
