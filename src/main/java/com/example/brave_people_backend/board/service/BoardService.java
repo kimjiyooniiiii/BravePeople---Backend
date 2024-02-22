@@ -95,37 +95,16 @@ public class BoardService {
 
     //글 수정
     public void updatePost(Long postId, PostRequestDto postRequestDto) {
-        //pathvariable에서 받은 postId로 post 객체 검색
-        Post findPost = boardRepository.findPostById(postId)
-                .orElseThrow(() -> new CustomException(String.valueOf(postId), "존재하지 않는 게시글"));
 
-        //현재 Post의 작성자와 다르면
-        if (!findPost.getMember().getMemberId().equals(SecurityUtil.getCurrentId())) {
-            throw new CustomException(String.valueOf(postId), "권한 없음");
-        }
-
-        if (findPost.isDisabled() || findPost.isDeleted()) {
-            throw new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글");
-        }
-
+        Post findPost = getFindPost(postId);
         findPost.updatePost(postRequestDto);
     }
 
     //글 삭제
     public void deletePost(Long postId) {
 
-        //pathvariable에서 받은 postId로 post 객체 검색
-        Post findPost = boardRepository.findPostById(postId)
-                .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
-
-        //현재 Post의 작성자와 다르면
-        if (!findPost.getMember().getMemberId().equals(SecurityUtil.getCurrentId())) {
-            throw new CustomException(String.valueOf(postId), "권한 없음");
-        }
-
-        if (findPost.isDeleted()) {
-            throw new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글");
-        }
+        //pathvariable에서 받은 postId로 post 객체 검색 -> 삭제되거나 비활성화된 게시글이면 오류
+        Post findPost = getFindPost(postId);
 
         //해당 게시글에서 진행중인 의뢰가 있으면 삭제하지 못하게 함
         List<Contact> findContact = contactRepository.findContactOneByStatusAndPost(findPost);
@@ -141,6 +120,24 @@ public class BoardService {
         }
 
         findPost.onDeleted();
+    }
+
+    //pathvariable에서 받은 postId로 post 객체 검색 -> 삭제되거나 비활성화된 게시글이면 오류
+    private Post getFindPost(Long postId) {
+        Post findPost = boardRepository.findByPostId(postId)
+                .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글ID"));
+        if (findPost.isDeleted()) {
+            throw new CustomException(String.valueOf(postId), "삭제된 게시글");
+        }
+        else if(findPost.isDisabled()) {
+            throw new CustomException(String.valueOf(postId), "비활성화된 게시글");
+        }
+
+        //현재 Post의 작성자와 다르면
+        if (!findPost.getMember().getMemberId().equals(SecurityUtil.getCurrentId())) {
+            throw new CustomException(String.valueOf(postId), "권한 없음");
+        }
+        return findPost;
     }
 
 }

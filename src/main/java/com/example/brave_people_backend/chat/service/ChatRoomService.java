@@ -120,9 +120,15 @@ public class ChatRoomService {
         Member currentMember = memberRepository.findById(currentId)
                 .orElseThrow(() -> new CustomException(String.valueOf(currentId), "존재하지 않는 멤버ID"));
 
-        //게시글 관련 데이터 초기화
-        Post currentPost = boardRepository.findPostById(postId)
-                .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글"));
+        //게시글 관련 데이터 초기화 -> 삭제되거나 비활성화된 게시글이면 오류
+        Post currentPost = boardRepository.findByPostId(postId)
+                .orElseThrow(() -> new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글ID"));
+        if (currentPost.isDeleted()) {
+            throw new CustomException(String.valueOf(postId), "삭제된 게시글");
+        }
+        else if(currentPost.isDisabled()) {
+            throw new CustomException(String.valueOf(postId), "비활성화된 게시글");
+        }
         Member postMember = currentPost.getMember();
 
         //본인과의 채팅방이 개설되지 않게 함
@@ -205,9 +211,20 @@ public class ChatRoomService {
         //현재 contact의 글 작성자의 상태를 진행중으로 바꿈 -> writer, other 모두 진행중 상태가 됨
         currentContact.changeStatus("writer", ContactStatus.진행중);
 
-        //현재 post를 찾음
-        Post currentPost = boardRepository.findPostById(currentContact.getPost().getPostId()).orElseThrow(() ->
-                new CustomException(String.valueOf(currentContact.getPost().getPostId()), "존재하지 않는 게시글"));
+        //현재 post를 찾음 -> 삭제되거나 비활성화된 게시글이면 오류
+        Post currentPost = currentContact.getPost();
+        if (currentPost.isDeleted()) {
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "삭제된 게시글");
+        }
+        else if(currentPost.isDisabled()) {
+            throw new CustomException(String.valueOf(currentPost.getPostId()), "비활성화된 게시글");
+        }
+
+        //이미 완료한 의뢰를 다시 진행시키지 못하게
+        ContactStatus myStatus = currentContact.getWriter().getMemberId().equals(currentId) ? currentContact.getWriterStatus() : currentContact.getOtherStatus();
+        if (myStatus == ContactStatus.진행중) {
+            throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 완료한 의뢰");
+        }
 
         //같은 postId로 생성된 contact를 찾음 -> 같은 게시글에서 생성된 의뢰들의 상태를 취소로 변경
         List<Contact> findContacts = contactRepository.findContactsByPost(currentPost);
@@ -234,6 +251,12 @@ public class ChatRoomService {
         Long currentId = SecurityUtil.getCurrentId();
 
         validateIsMyContact(currentContact, currentId);
+
+        //이미 완료한 의뢰를 다시 취소하지 못 하게
+        ContactStatus myStatus = currentContact.getWriter().getMemberId().equals(currentId) ? currentContact.getWriterStatus() : currentContact.getOtherStatus();
+        if (myStatus == ContactStatus.완료) {
+            throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 완료한 의뢰");
+        }
 
         currentContact.changeStatus("writer", ContactStatus.취소);
         currentContact.changeStatus("other", ContactStatus.취소);
