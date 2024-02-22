@@ -12,7 +12,7 @@ import java.util.List;
 public interface ChatRepository extends MongoRepository<Chat, String> {
 
     //보낸시각 최신순 정렬 후 채팅 300개 가져오기
-    @Query(value = "{send_at: {$gte: ?1}}", sort = "{send_at:-1}")
+    @Query(value = "{room_id: ?0, send_at: {$gte: ?1}}", sort = "{send_at:-1}")
     List<Chat> findTop300ByRoomId(Long roomId, LocalDateTime enteredAt);
 
     //보낸시각 최신순 정렬 후 채팅 1개 가져오기
