@@ -154,11 +154,7 @@ public class ChatRoomService {
             throw new CustomException(String.valueOf(postId), "본인의 게시글");
         }
 
-        /* writer -> 글 작성자
-        * other -> 부탁하기/달려가기 누르는 사람, 즉 currentMember
-        * postMember은 항상 writer, currentMember은 항상 other가 됨
-        * */
-
+        //writer -> 글 작성자   other -> 부탁하기/달려가기 누르는 사람, 즉 currentMember
         List<Contact> findContact = contactRepository.findContactOneByStatus(postMember, currentMember);
 
         //writer와 other 사이에 진행중인 의뢰가 있으면 오류
@@ -173,9 +169,6 @@ public class ChatRoomService {
         }
 
         //두 사람 사이에 같은 게시글에서 대기중인 의뢰가 있는지 확인
-        //원정대 게시글 -> 같은 멤버가 대기중/진행중일 땐 중복 부탁/달려가기 안됨, 취소/완료일 땐 가능
-        //진행중인 경우는 위에서 걸러짐
-        //의뢰인 게시글 -> 완료되면 어차피 disable 됨
         if (contactRepository.existsByWriterAndOtherAndWriterStatusAndOtherStatusAndPost(postMember, currentMember, ContactStatus.대기중, ContactStatus.진행중, currentPost)) {
             throw new CustomException(String.valueOf(currentPost.getPostId()), "이미 신청한 의뢰");
         }
@@ -192,22 +185,53 @@ public class ChatRoomService {
 
         contactRepository.save(contact);
 
-        //Contact 테이블에 이미 생성된 채팅방이 있는지 조회하여 없으면 생성
+        //두 사람 사이에 생성된 채팅방이 있는지 조회
         ChatRoom chatRoom = chatRoomRepository.findChatRoom(postMember, currentMember)
                 .orElseGet(() -> {
-                    ChatRoom newRoom = createChatRoom(postMember, currentMember);
-                    //빈 채팅 생성 후 save
-                    Chat makeChat = Chat.builder()
-                            .senderId(-1L)
-                            .roomId(newRoom.getChatRoomId())
-                            .isRead(false)
-                            .sendAt(LocalDateTime.now())
-                            .message(currentMember.getNickname() + "님이 채팅방을 개설하였습니다.")
-                            .url(null)
-                            .build();
-                    chatRepository.save(makeChat);
-                    return newRoom;
-                });
+                            ChatRoom newRoom = createChatRoom(postMember, currentMember);
+                            //빈 채팅 생성 후 save
+                            Chat makeChat = Chat.builder()
+                                    .senderId(-1L)
+                                    .roomId(newRoom.getChatRoomId())
+                                    .isRead(false)
+                                    .sendAt(LocalDateTime.now())
+                                    .message(currentMember.getNickname() + "님이 채팅방을 개설하였습니다.")
+                                    .url(null)
+                                    .build();
+                            chatRepository.save(makeChat);
+                            return newRoom;
+                        });
+
+        //A가 채팅방에서 나간 상태면 재입장 시키고 EnteredAt 업데이트
+        if (!chatRoom.isAIsPartIn()) {
+            chatRoom.changeIsPartIn("A", true);
+            chatRoom.changeEnteredAt("A", LocalDateTime.now());
+            Chat makeChat = Chat.builder()
+                    .senderId(chatRoom.getMemberA().getMemberId())
+                    .roomId(chatRoom.getChatRoomId())
+                    .isRead(false)
+                    .sendAt(LocalDateTime.now())
+                    .message(chatRoom.getMemberA().getNickname() + "님이 입장하였습니다.")
+                    .url(null)
+                    .build();
+            chatRepository.save(makeChat);
+
+        }
+        //B가 채팅방에서 나간 상태면 재입장 시키고 EnteredAt 업데이트
+        if(!chatRoom.isBIsPartIn()) {
+            chatRoom.changeIsPartIn("B", true);
+            chatRoom.changeEnteredAt("B", LocalDateTime.now());
+            Chat makeChat = Chat.builder()
+                    .senderId(chatRoom.getMemberB().getMemberId())
+                    .roomId(chatRoom.getChatRoomId())
+                    .isRead(false)
+                    .sendAt(LocalDateTime.now())
+                    .message(chatRoom.getMemberB().getNickname() + "님이 입장하였습니다.")
+                    .url(null)
+                    .build();
+            chatRepository.save(makeChat);
+        }
+
         chatRoom.changeContact(contact);
 
         //글 작성자에게 새 의뢰가 생성됨을 알림
@@ -226,6 +250,12 @@ public class ChatRoomService {
 
         validateIsMyContact(currentContact, currentId);
 
+        //이미 완료한 의뢰를 다시 진행시키지 못하게
+        ContactStatus myStatus = currentContact.getWriter().getMemberId().equals(currentId) ? currentContact.getWriterStatus() : currentContact.getOtherStatus();
+        if (myStatus == ContactStatus.완료) {
+            throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 완료한 의뢰");
+        }
+
         //현재 contact의 글 작성자의 상태를 진행중으로 바꿈 -> writer, other 모두 진행중 상태가 됨
         currentContact.changeStatus("writer", ContactStatus.진행중);
 
@@ -236,12 +266,6 @@ public class ChatRoomService {
         }
         else if(currentPost.isDisabled()) {
             throw new CustomException(String.valueOf(currentPost.getPostId()), "비활성화된 게시글");
-        }
-
-        //이미 완료한 의뢰를 다시 진행시키지 못하게
-        ContactStatus myStatus = currentContact.getWriter().getMemberId().equals(currentId) ? currentContact.getWriterStatus() : currentContact.getOtherStatus();
-        if (myStatus == ContactStatus.완료) {
-            throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 완료한 의뢰");
         }
 
         //같은 postId로 생성된 contact를 찾음 -> 같은 게시글에서 생성된 의뢰들의 상태를 취소로 변경

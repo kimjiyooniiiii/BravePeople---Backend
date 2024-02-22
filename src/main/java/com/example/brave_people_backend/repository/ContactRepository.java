@@ -21,10 +21,11 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
                                                                        @Param("OtherStatus") ContactStatus otherStatus,
                                                                        @Param("post") Post post);
 
-    //두 사람 사이에 현재 post와 관계 없이 진행중인 의뢰가 있는지 조회  -> 같은 사람끼리는 동시에 한 가지 의뢰만 가능
+    //두 사람 사이에 현재 post와 관계 없이 대기/진행중인 의뢰가 있는지 조회 -> 같은 사람끼리는 동시에 한 가지 의뢰만 가능
     @Query("select c from Contact c where ((c.writer = :writer and c.other = :other) or " +
             "(c.writer = :other and c.other = :writer)) " +
-            "and ((c.writerStatus = '진행중' and c.otherStatus = '진행중') or " +
+            "and ((c.writerStatus = '대기중' and c.otherStatus = '진행중') or" +
+            "(c.writerStatus = '진행중' and c.otherStatus = '진행중') or " +
             "(c.writerStatus = '완료' and c.otherStatus = '진행중') or " +
             "(c.writerStatus = '진행중' and c.otherStatus = '완료'))")
     List<Contact> findContactOneByStatus(@Param("writer") Member writer,

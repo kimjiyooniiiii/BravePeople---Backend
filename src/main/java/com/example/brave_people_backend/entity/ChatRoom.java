@@ -42,11 +42,11 @@ public class ChatRoom {
     private boolean bIsPartIn;
 
     @CreatedDate
-    @Column(columnDefinition = "timestamp", nullable = false, updatable = false)
+    @Column(columnDefinition = "timestamp", nullable = false)
     private LocalDateTime aEnteredAt;
 
     @CreatedDate
-    @Column(columnDefinition = "timestamp", nullable = false, updatable = false)
+    @Column(columnDefinition = "timestamp", nullable = false)
     private LocalDateTime bEnteredAt;
 
     @ColumnDefault("false")
@@ -80,5 +80,15 @@ public class ChatRoom {
         } else {
             this.bIsPartIn = isPartIn;
         }
+    }
+
+    public void changeEnteredAt(String identity, LocalDateTime enteredAt) {
+        if (identity.equals("A")) {
+            this.aEnteredAt = enteredAt;
+        }
+        else {
+            this.bEnteredAt = enteredAt;
+        }
+        this.aEnteredAt = aEnteredAt;
     }
 }
