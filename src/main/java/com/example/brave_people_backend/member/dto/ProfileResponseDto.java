@@ -21,9 +21,9 @@ public class ProfileResponseDto {
     private String profileImage;
     private Long memberId;
     private List<PostListVo> postListVo;
-    private List<String> reviews;
+    private List<ReviewListDto> reviews;
 
-    public static ProfileResponseDto of(Member member, List<PostListVo> postListVo, double score, List<String> reviews) {
+    public static ProfileResponseDto of(Member member, List<PostListVo> postListVo, double score, List<ReviewListDto> reviews) {
         return ProfileResponseDto.builder()
                 .username(member.getUsername())
                 .nickname(member.getNickname())

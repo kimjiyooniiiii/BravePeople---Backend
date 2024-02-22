@@ -60,7 +60,7 @@ public class MemberService {
         Sort reviewSort = Sort.by(Sort.Direction.DESC, "reviewId");
         List<Review> reviews = reviewRepository.findActiveReview(memberId, reviewSort); // 후기를 최신 순으로 검색
 
-        List<String> recentReviews = new ArrayList<>();
+        List<ReviewListDto> recentReviews = new ArrayList<>();
         int recentCount = 0;
         for(Review r : reviews) {
             // 후기 점수의 평균 계산
@@ -68,7 +68,7 @@ public class MemberService {
 
             // 최근 5개의 후기만 client에 반환
             if(recentCount < 5) {
-                recentReviews.add(r.getContents());
+                recentReviews.add(ReviewListDto.of(r));
                 recentCount++;
             }
         }
