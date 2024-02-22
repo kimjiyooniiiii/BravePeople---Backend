@@ -217,7 +217,7 @@ public class ChatRoomService {
         }
 
         // 상대방에게 상태가 변화되었다는 알림을 보냄
-        sendNewStatusAlert(currentContact.getOther().getMemberId());
+        sendNewStatusAlert(currentContact.getOther().getMemberId(), currentRoom.getChatRoomId());
 
         return getContactStatus(currentContact, currentId);
     }
@@ -237,11 +237,11 @@ public class ChatRoomService {
 
         // 내가 writer면, 알림 받는 사람은 other
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
-            sendNewStatusAlert(currentContact.getOther().getMemberId());
+            sendNewStatusAlert(currentContact.getOther().getMemberId(), currentRoom.getChatRoomId());
         }
         // 내가 other면, 알림 받는 사람은 writer
         else {
-            sendNewStatusAlert(currentContact.getWriter().getMemberId());
+            sendNewStatusAlert(currentContact.getWriter().getMemberId(), currentRoom.getChatRoomId());
         }
 
         return getContactStatus(currentContact, currentId);
@@ -255,6 +255,7 @@ public class ChatRoomService {
         Long currentId = SecurityUtil.getCurrentId();
 
         validateIsMyContact(currentContact, currentId);
+        validateStatusIsCancelOrWait(currentContact);
 
         // currentId == writer인 경우
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
@@ -263,14 +264,14 @@ public class ChatRoomService {
             if (currentContact.getOtherStatus() == ContactStatus.완료) {
                 reviewRepository.findByContact(currentContact).forEach(r -> r.changeIsDisabled(false));
             }
-            sendNewStatusAlert(currentContact.getOther().getMemberId());
+            sendNewStatusAlert(currentContact.getOther().getMemberId(), currentRoom.getChatRoomId());
         } else { //currentId == other인 경우
             currentContact.changeStatus("other", ContactStatus.완료);
             // writer, other 둘 다 완료 상태인 경우 기존 후기 활성화
             if (currentContact.getWriterStatus() == ContactStatus.완료) {
                 reviewRepository.findByContact(currentContact).forEach(r -> r.changeIsDisabled(false));
             }
-            sendNewStatusAlert(currentContact.getWriter().getMemberId());
+            sendNewStatusAlert(currentContact.getWriter().getMemberId(), currentRoom.getChatRoomId());
         }
 
         //contactStatus가 둘 다 완료이고 의뢰인 게시글이면 비활성화 함
@@ -401,8 +402,20 @@ public class ChatRoomService {
         }
     }
 
+    // 처리하려는 의뢰가 취소나 대기중 상태일 경우 예외를 발생시키는 메서드
+    private void validateStatusIsCancelOrWait(Contact currentContact) {
+        if (currentContact.getWriterStatus() == ContactStatus.취소
+                || currentContact.getOtherStatus() == ContactStatus.취소) {
+            throw new CustomException(String.valueOf(currentContact.getContactId()), "취소된 의뢰");
+        }
+        if (currentContact.getWriterStatus() == ContactStatus.대기중
+                || currentContact.getOtherStatus() == ContactStatus.대기중) {
+            throw new CustomException(String.valueOf(currentContact.getContactId()), "대기중인 의뢰");
+        }
+    }
+
     // SSE로 NEW_STATUS 알림을 보내는 메서드
-    private void sendNewStatusAlert(Long receiverId) {
-        sseService.sendEventToClient(NotificationType.NEW_STATUS, receiverId, null);
+    private void sendNewStatusAlert(Long receiverId, Long roomId) {
+        sseService.sendEventToClient(NotificationType.NEW_STATUS, receiverId, String.valueOf(roomId));
     }
 }
