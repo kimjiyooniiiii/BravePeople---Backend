@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
@@ -58,6 +59,10 @@ public class Member {
 
     @Column(length = 512)
     private String refreshToken;
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private int medalCount;
 
     //위도, 경도 변환 setter
     public void changeLatAndLng(BigDecimal lat, BigDecimal lng) {

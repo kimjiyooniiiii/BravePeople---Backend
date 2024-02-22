@@ -21,15 +21,17 @@ public class ProfileResponseDto {
     private String profileImage;
     private Long memberId;
     private List<PostListVo> postListVo;
+    private List<String> reviews;
 
-    public static ProfileResponseDto of(Member member, List<PostListVo> postListVo) {
+    public static ProfileResponseDto of(Member member, List<PostListVo> postListVo, double score, List<String> reviews) {
         return ProfileResponseDto.builder()
                 .username(member.getUsername())
                 .nickname(member.getNickname())
                 .gender(member.isGender() ? "여성" : "남성")
                 .introduction(member.getIntroduction())
-                .score(3.5)
-                .medalCount(28)
+                .score(score)
+                .reviews(reviews)
+                .medalCount(member.getMedalCount())
                 .profileImage(member.getProfileImg())
                 .memberId(member.getMemberId())
                 .postListVo(postListVo)

@@ -3,11 +3,13 @@ package com.example.brave_people_backend.member.service;
 import com.example.brave_people_backend.board.dto.PostListVo;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
+import com.example.brave_people_backend.entity.Review;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.member.dto.*;
 import com.example.brave_people_backend.repository.BoardRepository;
 import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
+import com.example.brave_people_backend.repository.ReviewRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final EmailRepository emailRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ReviewRepository reviewRepository;
 
     //위치 정보 변경
     public LocationResponseDto updateLocation(LocationRequestDto locationRequestDto) {
@@ -48,9 +53,29 @@ public class MemberService {
         Sort sort = Sort.by(Sort.Direction.DESC, "postId"); //POST 테이블의 post_id 기준 내림차순 정렬 설정
         PageRequest pageRequest = PageRequest.of(0, 5, sort); //출력할 page와 amount 및 sort 기준 설정 (pageable 구현체)
 
+        // 후기와 점수 Logic
+        double score = 0;
+        Sort reviewSort = Sort.by(Sort.Direction.DESC, "reviewId");
+        List<Review> reviews = reviewRepository.findActiveReview(memberId, reviewSort); // 후기를 최신 순으로 검색
+
+        List<String> recentReviews = new ArrayList<>();
+        int recentCount = 0;
+        for(Review r : reviews) {
+            // 후기 점수의 평균 계산
+            score += r.getScore();
+
+            // 최근 5개의 후기만 client에 반환
+            if(recentCount < 5) {
+                recentReviews.add(r.getContents());
+                recentCount++;
+            }
+        }
+        score /= reviews.size();
+
         return ProfileResponseDto.of(memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(String.valueOf(memberId), "존재하지 않는 멤버ID")),
-                boardRepository.findPostListByProfilePage(memberId, pageRequest).map(PostListVo::of).toList()
+                boardRepository.findPostListByProfilePage(memberId, pageRequest).map(PostListVo::of).toList(),
+                Math.round(score*10)/10.0, recentReviews
         );
     }
 
