@@ -49,14 +49,6 @@ public class ChatRoom {
     @Column(columnDefinition = "timestamp", nullable = false)
     private LocalDateTime bEnteredAt;
 
-    @ColumnDefault("false")
-    @Column(columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean aIsRead;
-
-    @ColumnDefault("false")
-    @Column(columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean bIsRead;
-
     private String aLastReadId;       // A가 마지막으로 읽은 채팅 메시지의 ID
 
     private String bLastReadId;       // B가 마지막으로 읽은 채팅 메시지의 ID
@@ -64,10 +56,6 @@ public class ChatRoom {
     public void changeContact(Contact contact) {
         this.contact = contact;
     }
-
-    public void changeAIsRead(boolean aIsRead) { this.aIsRead = aIsRead; }
-
-    public void changeBIsRead(boolean bIsRead) { this.bIsRead = bIsRead; }
 
     public void changeALastReadId(String chatId) { this.aLastReadId = chatId; }
 
