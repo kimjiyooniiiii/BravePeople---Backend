@@ -13,7 +13,6 @@ import com.example.brave_people_backend.repository.*;
 import com.example.brave_people_backend.security.SecurityUtil;
 import com.example.brave_people_backend.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,7 +119,7 @@ public class ContactService {
             chatRoom.changeIsPartIn("A", true);
             chatRoom.changeEnteredAt("A", LocalDateTime.now());
             Chat makeChat = Chat.builder()
-                    .senderId(chatRoom.getMemberA().getMemberId())
+                    .senderId(-1L)
                     .roomId(chatRoom.getChatRoomId())
                     .isRead(false)
                     .sendAt(LocalDateTime.now())
@@ -135,7 +134,7 @@ public class ContactService {
             chatRoom.changeIsPartIn("B", true);
             chatRoom.changeEnteredAt("B", LocalDateTime.now());
             Chat makeChat = Chat.builder()
-                    .senderId(chatRoom.getMemberB().getMemberId())
+                    .senderId(-1L)
                     .roomId(chatRoom.getChatRoomId())
                     .isRead(false)
                     .sendAt(LocalDateTime.now())
