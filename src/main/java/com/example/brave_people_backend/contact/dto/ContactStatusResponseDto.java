@@ -1,6 +1,5 @@
-package com.example.brave_people_backend.chat.dto;
+package com.example.brave_people_backend.contact.dto;
 
-import com.example.brave_people_backend.entity.Contact;
 import com.example.brave_people_backend.enumclass.ContactStatus;
 import lombok.Builder;
 import lombok.Getter;

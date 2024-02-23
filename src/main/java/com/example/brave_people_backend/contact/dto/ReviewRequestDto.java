@@ -1,4 +1,4 @@
-package com.example.brave_people_backend.chat.dto;
+package com.example.brave_people_backend.contact.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
