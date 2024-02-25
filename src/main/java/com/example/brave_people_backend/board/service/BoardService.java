@@ -7,6 +7,7 @@ import com.example.brave_people_backend.board.dto.PostResponseDto;
 import com.example.brave_people_backend.entity.Contact;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.entity.Post;
+import com.example.brave_people_backend.entity.Review;
 import com.example.brave_people_backend.enumclass.Act;
 import com.example.brave_people_backend.enumclass.ContactStatus;
 import com.example.brave_people_backend.exception.Custom404Exception;
@@ -14,6 +15,7 @@ import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.BoardRepository;
 import com.example.brave_people_backend.repository.ContactRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
+import com.example.brave_people_backend.repository.ReviewRepository;
 import com.example.brave_people_backend.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +35,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
     private final ContactRepository contactRepository;
+    private final ReviewRepository reviewRepository;
 
     // 글 목록 불러오기
     @Transactional(readOnly = true)
@@ -90,7 +93,17 @@ public class BoardService {
             throw new Custom404Exception(String.valueOf(postId), "존재하지 않는 게시글");
         }
 
-        return PostResponseDto.of(findPost);
+        return PostResponseDto.of(findPost, calcReviewScoreAvg(findPost.getMember()));
+    }
+
+    private double calcReviewScoreAvg(Member member) {
+        // 리뷰들의 점수 평균을 구하고, 리뷰가 하나도 없을 시 0.0을 반환한다.
+        double avg = reviewRepository.findByMember(member)
+                .stream()
+                .mapToInt(Review::getScore)
+                .average()
+                .orElse(0.0);
+        return Math.round(avg*10)/10.0; //소수점 둘째 자리에서 반올림하여 반환
     }
 
     //글 수정

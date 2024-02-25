@@ -20,4 +20,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // 나의 활성화된 후기 검색
     @Query("select r from Review r where r.member.memberId = :memberId and r.isDisabled = false")
     List<Review> findActiveReview(@Param("memberId") Long memberId, Sort sort);
+
+    //멤버로 리뷰 검색
+    List<Review> findByMember(Member member);
 }

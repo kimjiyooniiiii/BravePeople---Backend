@@ -27,7 +27,7 @@ public class PostResponseDto {
     private Long memberId;
     private Long postId;
 
-    public static PostResponseDto of(Post post) {
+    public static PostResponseDto of(Post post, double score) {
         return PostResponseDto.builder()
                 .type(post.getAct().toString())
                 .title(post.getTitle())
@@ -41,7 +41,7 @@ public class PostResponseDto {
                 .profileImg(post.getMember().getProfileImg())
                 .lat(post.getLat().toString())
                 .lng(post.getLng().toString())
-                .score(4.5)
+                .score(score)
                 .isDisabled(post.isDisabled())
                 .memberId(post.getMember().getMemberId())
                 .postId(post.getPostId())
