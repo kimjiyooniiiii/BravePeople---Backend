@@ -1,6 +1,7 @@
 package com.example.brave_people_backend.contact.service;
 
 import com.example.brave_people_backend.board.dto.ContactResponseDto;
+import com.example.brave_people_backend.chat.dto.SendResponseDto;
 import com.example.brave_people_backend.contact.dto.ContactStatusResponseDto;
 import com.example.brave_people_backend.contact.dto.ReviewRequestDto;
 import com.example.brave_people_backend.entity.*;
@@ -13,11 +14,13 @@ import com.example.brave_people_backend.repository.*;
 import com.example.brave_people_backend.security.SecurityUtil;
 import com.example.brave_people_backend.sse.service.SseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,8 @@ public class ContactService {
     private final ContactRepository contactRepository;
     private final SseService sseService;
     private final ReviewRepository reviewRepository;
+    private final SimpMessageSendingOperations template;
+
 
     // 달려가기, 부탁하기 -> 채팅방 생성
     public ChatRoom createChatRoom(Member memberA, Member memberB) {
@@ -102,15 +107,14 @@ public class ContactService {
                 .orElseGet(() -> {
                     ChatRoom newRoom = createChatRoom(postMember, currentMember);
                     //빈 채팅 생성 후 save
-                    Chat makeChat = Chat.builder()
-                            .senderId(-1L)
+                    chatRepository.save(Chat.builder()
+                            .id(UUID.randomUUID().toString())
                             .roomId(newRoom.getChatRoomId())
-                            .isRead(false)
                             .sendAt(LocalDateTime.now())
+                            .senderId(-1L)
                             .message(currentMember.getNickname() + "님이 채팅방을 개설하였습니다.")
                             .url(null)
-                            .build();
-                    chatRepository.save(makeChat);
+                            .build());
                     return newRoom;
                 });
 
@@ -118,34 +122,17 @@ public class ContactService {
         if (!chatRoom.isAIsPartIn()) {
             chatRoom.changeIsPartIn("A", true);
             chatRoom.changeEnteredAt("A", LocalDateTime.now());
-            Chat makeChat = Chat.builder()
-                    .senderId(-1L)
-                    .roomId(chatRoom.getChatRoomId())
-                    .isRead(false)
-                    .sendAt(LocalDateTime.now())
-                    .message(chatRoom.getMemberA().getNickname() + "님이 입장하였습니다.")
-                    .url(null)
-                    .build();
-            chatRepository.save(makeChat);
-
+            sendContactStatusMessage(chatRoom, chatRoom.getMemberA(), "입장");
         }
         //B가 채팅방에서 나간 상태면 재입장 시키고 EnteredAt 업데이트
         if(!chatRoom.isBIsPartIn()) {
             chatRoom.changeIsPartIn("B", true);
             chatRoom.changeEnteredAt("B", LocalDateTime.now());
-            Chat makeChat = Chat.builder()
-                    .senderId(-1L)
-                    .roomId(chatRoom.getChatRoomId())
-                    .isRead(false)
-                    .sendAt(LocalDateTime.now())
-                    .message(chatRoom.getMemberB().getNickname() + "님이 입장하였습니다.")
-                    .url(null)
-                    .build();
-            chatRepository.save(makeChat);
+            sendContactStatusMessage(chatRoom, chatRoom.getMemberB(), "입장");
         }
 
         chatRoom.changeContact(contact);
-
+        sendContactStatusMessage(chatRoom, currentMember, "의뢰를 신청");
         //글 작성자에게 새 의뢰가 생성됨을 알림
         sseService.sendEventToClient(NotificationType.NEW_CONTACT, postMember.getMemberId(), "새로운 의뢰 생성");
 
@@ -168,9 +155,6 @@ public class ContactService {
             throw new CustomException(String.valueOf(currentContact.getContactId()), "이미 완료한 의뢰");
         }
 
-        //현재 contact의 글 작성자의 상태를 진행중으로 바꿈 -> writer, other 모두 진행중 상태가 됨
-        currentContact.changeStatus("writer", ContactStatus.진행중);
-
         //현재 post를 찾음 -> 삭제되거나 비활성화된 게시글이면 오류
         Post currentPost = currentContact.getPost();
         if (currentPost.isDeleted()) {
@@ -179,6 +163,9 @@ public class ContactService {
         else if(currentPost.isDisabled()) {
             throw new CustomException(String.valueOf(currentPost.getPostId()), "비활성화된 게시글");
         }
+
+        //현재 contact의 글 작성자의 상태를 진행중으로 바꿈 -> writer, other 모두 진행중 상태가 됨
+        currentContact.changeStatus("writer", ContactStatus.진행중);
 
         //같은 postId로 생성된 contact를 찾음 -> 같은 게시글에서 생성된 의뢰들의 상태를 취소로 변경
         List<Contact> findContacts = contactRepository.findContactsByPost(currentPost);
@@ -190,6 +177,7 @@ public class ContactService {
             }
         }
 
+        sendContactStatusMessage(currentRoom, currentContact.getWriter(), "의뢰를 수락");
         // 상대방에게 상태가 변화되었다는 알림을 보냄
         sendNewStatusAlert(currentContact.getOther().getMemberId(), currentRoom.getChatRoomId());
 
@@ -218,10 +206,13 @@ public class ContactService {
         // 내가 writer면, 알림 받는 사람은 other
         if (currentId.equals(currentContact.getWriter().getMemberId())) {
             sendNewStatusAlert(currentContact.getOther().getMemberId(), currentRoom.getChatRoomId());
+            sendContactStatusMessage(currentRoom, currentContact.getWriter(), "의뢰를 취소");
+
         }
         // 내가 other면, 알림 받는 사람은 writer
         else {
             sendNewStatusAlert(currentContact.getWriter().getMemberId(), currentRoom.getChatRoomId());
+            sendContactStatusMessage(currentRoom, currentContact.getOther(), "의뢰를 취소");
         }
 
         return getContactStatus(currentContact, currentId);
@@ -408,6 +399,19 @@ public class ContactService {
     // SSE로 NEW_STATUS 알림을 보내는 메서드
     public void sendNewStatusAlert(Long receiverId, Long roomId) {
         sseService.sendEventToClient(NotificationType.NEW_STATUS, receiverId, String.valueOf(roomId));
+    }
+
+    //의뢰 상태 변경, 채팅방 입장/퇴장 시 채팅방에 메시지 전송
+    public void sendContactStatusMessage(ChatRoom chatRoom, Member member, String message) {
+        Chat makeChat = Chat.builder()
+                .id(UUID.randomUUID().toString())
+                .senderId(-1L)
+                .roomId(chatRoom.getChatRoomId())
+                .sendAt(LocalDateTime.now())
+                .message(member.getNickname() + "님이 " + message + "하였습니다.")
+                .url(null)
+                .build();
+        template.convertAndSend("/sub/" + chatRoom.getChatRoomId(), SendResponseDto.of(chatRepository.save(makeChat)));
     }
 
 }

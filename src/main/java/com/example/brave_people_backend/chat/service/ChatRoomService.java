@@ -1,14 +1,13 @@
 package com.example.brave_people_backend.chat.service;
 
-import com.example.brave_people_backend.board.dto.ContactResponseDto;
-import com.example.brave_people_backend.chat.dto.*;
-import com.example.brave_people_backend.contact.dto.ContactStatusResponseDto;
+import com.example.brave_people_backend.chat.dto.ChatResponseDto;
+import com.example.brave_people_backend.chat.dto.ChatRoomResponseVo;
+import com.example.brave_people_backend.chat.dto.SendResponseDto;
 import com.example.brave_people_backend.contact.service.ContactService;
-import com.example.brave_people_backend.entity.*;
-import com.example.brave_people_backend.enumclass.Act;
+import com.example.brave_people_backend.entity.Chat;
+import com.example.brave_people_backend.entity.ChatRoom;
+import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.enumclass.ContactStatus;
-import com.example.brave_people_backend.enumclass.NotificationType;
-import com.example.brave_people_backend.exception.Custom404Exception;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.repository.*;
 import com.example.brave_people_backend.security.SecurityUtil;

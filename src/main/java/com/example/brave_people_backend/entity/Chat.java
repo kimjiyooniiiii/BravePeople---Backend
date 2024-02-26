@@ -35,9 +35,6 @@ public class Chat {
     @CreatedDate
     private LocalDateTime sendAt;
 
-    @Field("is_read")
-    private boolean isRead;
-
     @Field("url")
     private String url;
 
