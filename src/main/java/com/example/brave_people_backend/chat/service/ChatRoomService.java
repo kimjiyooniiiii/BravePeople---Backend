@@ -178,7 +178,8 @@ public class ChatRoomService {
                     .id(UUID.randomUUID().toString())
                     .roomId(roomId)
                     .senderId(-1L)
-                    .message(nickName + "님이 채팅방을 나갔습니다.")
+                    .sendAt(LocalDateTime.now())
+                    .message(nickName + "님이 퇴장하였습니다.")
                     .url(null)
                     .build();
 
