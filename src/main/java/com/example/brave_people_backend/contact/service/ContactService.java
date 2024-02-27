@@ -134,7 +134,7 @@ public class ContactService {
         chatRoom.changeContact(contact);
         sendContactStatusMessage(chatRoom, currentMember, "의뢰를 신청");
         //글 작성자에게 새 의뢰가 생성됨을 알림
-        sseService.sendEventToClient(NotificationType.NEW_CONTACT, postMember.getMemberId(), "새로운 의뢰 생성");
+        sseService.sendEventToClient(NotificationType.NEW_CONTACT, postMember.getMemberId(), "새로운 의뢰 요청이 있습니다.");
 
         return ContactResponseDto.of(chatRoom.getChatRoomId());
     }
