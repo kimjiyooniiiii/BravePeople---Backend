@@ -236,6 +236,7 @@ public class ContactService {
                 reviewRepository.findByContact(currentContact).forEach(r -> r.changeIsDisabled(false));
             }
             sendNewStatusAlert(currentContact.getOther().getMemberId(), currentRoom.getChatRoomId());
+            sendContactStatusMessage(currentRoom, currentContact.getWriter(), "의뢰를 완료");
         } else { //currentId == other인 경우
             currentContact.changeStatus("other", ContactStatus.완료);
             // writer, other 둘 다 완료 상태인 경우 기존 후기 활성화
@@ -243,6 +244,7 @@ public class ContactService {
                 reviewRepository.findByContact(currentContact).forEach(r -> r.changeIsDisabled(false));
             }
             sendNewStatusAlert(currentContact.getWriter().getMemberId(), currentRoom.getChatRoomId());
+            sendContactStatusMessage(currentRoom, currentContact.getOther(), "의뢰를 완료");
         }
 
         // contactStatus가 둘 다 완료인 경우 뱃지 개수를 +1 함
