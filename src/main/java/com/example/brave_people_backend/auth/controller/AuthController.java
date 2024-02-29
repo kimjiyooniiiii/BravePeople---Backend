@@ -5,6 +5,7 @@ import com.example.brave_people_backend.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -48,9 +49,23 @@ public class AuthController {
     }
 
     //이메일 인증 링크 클릭시 프론트에 링크 전송 후 받는 컨트롤러 메서드
-    @GetMapping("/code-confirm")
+    @GetMapping(value = "/code-confirm", produces = MediaType.TEXT_HTML_VALUE)
     public String codeConfirm(@RequestParam("id") Long emailId, @RequestParam("code") int authCode) {
-        return authService.codeConfirm(emailId, authCode);
+        String message =  authService.codeConfirm(emailId, authCode);
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<body>\n" +
+                "<div style=\"margin:100px;\">\n" +
+                "    <h1> 안녕하세요.</h1>\n" +
+                "    <h1> 용감한원정대 BravePeople 입니다.</h1>\n" +
+                "    <br>\n" +
+                "    <div align=\"center\" style=\"border:1px solid black; font-family:verdana;\">\n" +
+                "    <h3> " + message + "</h3>\n" +
+                "    </div>\n" +
+                "    <br/>\n" +
+                "</div>\n" +
+                "</body>\n" +
+                "</html>";
     }
 
     //비밀번호 찾기

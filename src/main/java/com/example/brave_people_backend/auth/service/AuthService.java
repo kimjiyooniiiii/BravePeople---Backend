@@ -1,13 +1,11 @@
 package com.example.brave_people_backend.auth.service;
 
 import com.example.brave_people_backend.auth.dto.*;
-import com.example.brave_people_backend.entity.Chat;
 import com.example.brave_people_backend.entity.ChatRoom;
 import com.example.brave_people_backend.entity.Email;
 import com.example.brave_people_backend.entity.Member;
 import com.example.brave_people_backend.exception.CustomException;
 import com.example.brave_people_backend.jwt.TokenProvider;
-import com.example.brave_people_backend.repository.ChatRepository;
 import com.example.brave_people_backend.repository.ChatRoomRepository;
 import com.example.brave_people_backend.repository.EmailRepository;
 import com.example.brave_people_backend.repository.MemberRepository;
@@ -43,7 +41,6 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final JavaMailSender javaMailSender;
     private final ChatRoomRepository chatRoomRepository;
-    private final ChatRepository chatRepository;
 
     // 회원가입 service
     @Transactional
@@ -229,7 +226,7 @@ public class AuthService {
         String toMail = emailEntity.getEmailAddress(); //받는 사람
         String title = "[용감한원정대] 회원가입 인증 링크"; //제목
         String authLink =
-                "http://13.209.77.50:8080/auth/code-confirm?id=" + emailEntity.getEmailId()
+                "https://api.bravepeople.site/auth/code-confirm?id=" + emailEntity.getEmailId()
                         + "&code=" + emailEntity.getAuthCode();
         String text =
                 "<!DOCTYPE html>\n" +
@@ -263,7 +260,7 @@ public class AuthService {
         String toMail = emailEntity.getEmailAddress(); //받는 사람
         String title = "[용감한원정대] 비밀번호 찾기 링크"; //제목
         String authLink =
-                "http://localhost:3000/resetpw?emailid=" + emailEntity.getEmailId()
+                "https://bravepeople.site/resetpw?emailid=" + emailEntity.getEmailId()
                         + "&code=" + emailEntity.getAuthCode();
         String text =
                 "<!DOCTYPE html>\n" +
