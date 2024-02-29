@@ -156,7 +156,8 @@ public class ChatRoomService {
 
         // 나의 의뢰가 이미 "완료된 상태"가 아니면 의뢰상태를 "취소"로 바꿈
         if(!status.equals(ContactStatus.완료)) {
-            chatRoom.getContact().changeStatus(name, ContactStatus.취소);
+            chatRoom.getContact().changeStatus("writer", ContactStatus.취소);
+            chatRoom.getContact().changeStatus("other", ContactStatus.취소);
         }
 
         // 채팅방 삭제를 위한 상대방의 참여여부 확인
