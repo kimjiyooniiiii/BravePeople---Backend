@@ -65,9 +65,11 @@ public class ChatService {
             template.convertAndSend("/sub/" + roomId, SendResponseDto.of(chatRepository.save(chat)));
 
             //받는 사람에게 sse로 알림 전송, TALK일 때만 알림 전송
-            sseService.sendEventToClient(NotificationType.NEW_CHAT, other.getMemberId(), me.getNickname()+"님이 메시지를 보냈습니다.");
+            //other가 채팅방에 접속한 경우 (두 명 다 채팅방에 접속한 경우)만 SSE 알림 전송
+            if (chatRoom.isAIsPartIn() && chatRoom.isBIsPartIn()) {
+                sseService.sendEventToClient(NotificationType.NEW_CHAT, other.getMemberId(), me.getNickname() + "님이 메시지를 보냈습니다.");
+            }
         }
-
     }
 
     // WebSocket 연결 해제
