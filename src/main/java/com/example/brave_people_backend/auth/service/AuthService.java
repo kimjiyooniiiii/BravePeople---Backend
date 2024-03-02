@@ -112,9 +112,8 @@ public class AuthService {
         Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
         String memberId = authentication.getName();
 
-        if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
-            throw new JwtException("Refresh Token 만료");
-        }
+        // Refresh Token 유효성 검사
+        tokenProvider.validateToken(tokenRequestDto.getRefreshToken());
 
         // 사용자가 DB에 없을 경우
         Member member = memberRepository.findById(Long.parseLong(memberId))
