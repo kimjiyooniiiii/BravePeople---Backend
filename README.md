@@ -31,8 +31,14 @@
 <br>
 
 ### 임태호 (Back-End Development) <a href = "https://github.com/taeho99"><img alt="GitHub" width="70px" src ="https://img.shields.io/badge/GitHub-181717.svg?&style=for-the-badge&logo=GitHub&logoColor=white"/></a>
--
--
+-	DB 접속 정보, JWT 비밀키, AWS 키와 같은 민감한 정보를 별도의 환경변수 파일로 분리
+-	게시글의 위치정보를 활용한 거리기반 게시글 조회기능 개발
+-	Gmail 활용 SMTP 프로토콜을 이용하여 이메일 전송 및 인증 로직 개발
+-	스프링 스케줄러 활용, 매시 정각마다 필요한 로직 실행되도록 셋팅
+- 채팅 데이터를 저장을 위한 몽고DB 커넥션 설정 및 채팅 데이터 도큐먼트 생성
+-	도메인 주소 구입(Route53) 및 백엔드, 프론트엔드 서버와 연결
+-	도메인 – SSL 인증서 발급(ACM) 및 HTTPS 배포(ALB)
+-	그 외 프로필 페이지, 비밀번호 찾기, 채팅방 리스트, 채팅 내역, 리뷰 관련 API 개발
 
 <br>
 
@@ -66,7 +72,7 @@
 - DB의 원격 개발 환경 구축을 위해 AWS RDS에 MySQL 설치, EC2에 MongoDB 설치
 - https 보안 프로토콜 사용
 
-<img width="700" alt="image" src="https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/117561820/3d529287-c547-4a47-8a76-fe2850c4a77d">
+<img width="700" alt="image" src="https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/1acf6e76-9693-4a7f-900e-5435df02b4b7">
 
 <br>
 
@@ -80,8 +86,7 @@
 -	정적 콘텐츠를 안전하게 배포하기 위해, https를 지원하는 AWS CloudFront로 Front-End 배포
 -	Route53
 
-<img width="362" alt="image" src="https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/117561820/bec8cdb5-b5a1-4693-af0b-81f2f4dd42e6">
-
+<img width="450" alt="image" src="https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/bc38dec3-7250-479e-8ec7-bb722a3e9878">
 
 <br>
 
@@ -115,3 +120,9 @@
 ### 📺 게시판 기능
 
 ### 📺 채팅 기능
+
+
+
+https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/59378cb7-e842-4494-8577-c877a83cb78c
+
+
