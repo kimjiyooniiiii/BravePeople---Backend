@@ -13,7 +13,7 @@
 
 ### 👥 개발 인원 (5명)
 - #### Back-End : &nbsp; 김지윤(PM),&nbsp; 임태호, &nbsp; 유나영 
-- #### Front-End : &nbsp; 김한수,&nbsp; 장현지
+- #### Front-End : &nbsp; 김한수,&nbsp; 장현지 &nbsp; [FrontEnd Github](https://github.com/hyunjihub/BravePeople-Frontend)
 
 <br><br>
 
