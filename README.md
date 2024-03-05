@@ -70,7 +70,7 @@
 ## ✔ Server 배포
 - 빠른 개발과 이슈 대응을 위해 Git Actions, AWS CodeDeploy로 Server CI/CD 구축
 - DB의 원격 개발 환경 구축을 위해 AWS RDS에 MySQL 설치, EC2에 MongoDB 설치
-- https 보안 프로토콜 사용
+- AWS Application Load Balancer를 통해 HTTPS(:443)를 HTTP(:8080)로 라우팅하여 HTTPS 보안 프로토콜 구축
 
 <img width="700" alt="image" src="https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/1acf6e76-9693-4a7f-900e-5435df02b4b7">
 
@@ -84,7 +84,7 @@
 
 ## ✔ Client 배포
 -	정적 콘텐츠를 안전하게 배포하기 위해, https를 지원하는 AWS CloudFront로 Front-End 배포
--	Route53
+-	AWS CloudFront에 대체도메인(CNAME)을 Route53에 연결하여 도메인 구축
 
 <img width="450" alt="image" src="https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/bc38dec3-7250-479e-8ec7-bb722a3e9878">
 
@@ -117,12 +117,12 @@
 ## ✔ 프로젝트 실행 영상
 ### 📺 회원 기능
 
+https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/5ee35e37-0659-476f-a116-04e65f0bcd4d
+
 ### 📺 게시판 기능
+
+https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/65436baf-1c5b-46f5-882a-a7b6da2d8f35
 
 ### 📺 채팅 기능
 
-
-
-https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/59378cb7-e842-4494-8577-c877a83cb78c
-
-
+https://github.com/kimjiyooniiiii/BravePeople-Backend/assets/70526479/b11109e5-07f3-4698-b46f-3c0ad553c963
