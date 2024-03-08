@@ -22,7 +22,7 @@
 -	빠른 개발과 이슈 대응을 위해 Server CI/CD 구축 [ Details ](https://sky-pail-416.notion.site/Server-CI-CD-4251af0cbc194183afa67dd1242cf9d7?pvs=4)
 -	Back-End 배포 (AWS EC2),  Front-End 배포 (AWS CloudFront)
 -	Sever의 부담이 적고, Rest 서비스가 가능한 JWT Token을 사용하여 사용자 인증, 인가 구현  [ Details ](https://sky-pail-416.notion.site/JWT-Token-274ba219cf694dc79a4a071cc4e4ece1?pvs=4)
--	실시간 채팅 기능 개발을 위해 양방향 통신 프로토콜인 Web Socket, STOMP를 사용하여 채팅 서비스 개발
+-	실시간 채팅 기능 개발을 위해 양방향 통신 프로토콜인 Web Socket, STOMP를 사용하여 채팅 서비스 개발 [Details](https://sky-pail-416.notion.site/Web-Socket-b67e3daa8dff48058f50e0de107de4f3?pvs=4)
 -	프로젝트 전반적인 예외 관리와 Client에 전송할 에러 메시지 규격화를 위해 프로젝트 전역에서 사용하는 예외처리 Class 개발
 -	서버 로그를 팀원들과 공유하고 로그를 빠르게 추적하기 위해 Logback 설정 및 AWS CloudWatch로 로그 전송
 -	사용자의 이미지 업로드 서비스 제공을 위해 API 개발 및 AWS S3에 정적 이미지 파일 배포
