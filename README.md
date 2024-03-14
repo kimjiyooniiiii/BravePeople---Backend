@@ -12,13 +12,13 @@
 <br>
 
 ### 👥 개발 인원 (5명)
-- #### Back-End : &nbsp; 김지윤(PL),&nbsp; 임태호, &nbsp; 유나영 
+- #### Back-End : &nbsp; 김지윤(PM),&nbsp; 임태호, &nbsp; 유나영 
 - #### Front-End : &nbsp; 김한수,&nbsp; 장현지 &nbsp; [FrontEnd Github](https://github.com/hyunjihub/BravePeople-Frontend)
 
 <br><br>
 
 ## 👨‍💻 맡은 역할
-### 김지윤 (PL, Back-End Development) <a href = "https://github.com/kimjiyooniiiii"><img alt="GitHub" width="70px" src ="https://img.shields.io/badge/GitHub-181717.svg?&style=for-the-badge&logo=GitHub&logoColor=white"/></a>
+### 김지윤 (PM, Back-End Development) <a href = "https://github.com/kimjiyooniiiii"><img alt="GitHub" width="70px" src ="https://img.shields.io/badge/GitHub-181717.svg?&style=for-the-badge&logo=GitHub&logoColor=white"/></a>
 -	빠른 개발과 이슈 대응을 위해 Server CI/CD 구축 [ Details ](https://sky-pail-416.notion.site/Server-CI-CD-4251af0cbc194183afa67dd1242cf9d7?pvs=4)
 -	Back-End 배포 (AWS EC2),  Front-End 배포 (AWS CloudFront)
 -	Sever의 부담이 적고, Rest 서비스가 가능한 JWT Token을 사용하여 사용자 인증, 인가 구현  [ Details ](https://sky-pail-416.notion.site/JWT-Token-274ba219cf694dc79a4a071cc4e4ece1?pvs=4)
