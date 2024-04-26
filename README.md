@@ -7,7 +7,7 @@
 
 <br>
 
-### 🕐 개발 기간 : 2023.12.21 ~ 2024.02.29 (2개월)
+### 🕐 개발 기간 : 2023.12.21 ~ 2024.02.29 (2개월)  **[WBS](https://docs.google.com/spreadsheets/d/1W9j1R325ERFuEkAD-kJzC28_71_ShRM0I5-NaoGMERs/edit?usp=sharing)**
 
 <br>
 
