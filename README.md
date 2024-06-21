@@ -19,14 +19,15 @@
 
 ## 👨‍💻 맡은 역할
 ### 김지윤 (PM, Back-End Development) <a href = "https://github.com/kimjiyooniiiii"><img alt="GitHub" width="70px" src ="https://img.shields.io/badge/GitHub-181717.svg?&style=for-the-badge&logo=GitHub&logoColor=white"/></a>
--	빠른 개발과 이슈 대응을 위해 Server CI/CD 구축 [ Details ](https://sky-pail-416.notion.site/Server-CI-CD-4251af0cbc194183afa67dd1242cf9d7?pvs=4)
+-	빠른 개발과 이슈 대응을 위해 Server CI/CD 구축 [ Details ](https://velog.io/@wldbs35/Server-%EB%B0%B0%ED%8F%AC-CICD-%EA%B5%AC%EC%B6%95)
 -	Back-End 배포 (AWS EC2),  Front-End 배포 (AWS CloudFront)
--	Sever의 부담이 적고, Rest 서비스가 가능한 JWT Token을 사용하여 사용자 인증, 인가 구현  [ Details ](https://sky-pail-416.notion.site/JWT-Token-274ba219cf694dc79a4a071cc4e4ece1?pvs=4)
--	실시간 채팅 기능 개발을 위해 양방향 통신 프로토콜인 Web Socket, STOMP를 사용하여 채팅 서비스 개발 [Details](https://sky-pail-416.notion.site/Web-Socket-b67e3daa8dff48058f50e0de107de4f3?pvs=4)
+-	Sever의 부담이 적고, Rest 서비스가 가능한 JWT Token을 사용하여 사용자 인증, 인가 구현  [ Details ](https://velog.io/@wldbs35/JWT-Token-%EC%82%AC%EC%9A%A9%EC%9E%90-%EC%9D%B8%EC%A6%9D)
+-	실시간 채팅 기능 개발을 위해 양방향 통신 프로토콜인 Web Socket, STOMP를 사용하여 채팅 서비스 개발 [Details](https://velog.io/@wldbs35/Web-Socket-%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%B1%84%ED%8C%85-%EA%B5%AC%ED%98%84%EA%B3%BC-%EB%B3%B4%EC%95%88)
 -	프로젝트 전반적인 예외 관리와 Client에 전송할 에러 메시지 규격화를 위해 프로젝트 전역에서 사용하는 예외처리 Class 개발
 -	서버 로그를 팀원들과 공유하고 로그를 빠르게 추적하기 위해 Logback 설정 및 AWS CloudWatch로 로그 전송
 -	사용자의 이미지 업로드 서비스 제공을 위해 API 개발 및 AWS S3에 정적 이미지 파일 배포
 -	그외 회원가입, 로그인, 토큰 재발급, 로그아웃, 채팅방 나가기 API 개발
+-	트러블 슈팅 : [ 채팅 읽음 여부 처리 ](https://velog.io/@wldbs35/%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%B1%84%ED%8C%85-%EC%8B%9C-%EB%A9%94%EC%8B%9C%EC%A7%80-%EC%9D%BD%EC%9D%8C-%EC%B2%98%EB%A6%AC-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0) , [ 사용자 독립적인 채팅 관리 ](https://velog.io/@wldbs35/%EC%82%AC%EC%9A%A9%EC%9E%90-%EB%B3%84-%EB%8F%85%EB%A6%BD%EC%A0%81%EC%9D%B8-%EC%B1%84%ED%8C%85%EB%A9%94%EC%8B%9C%EC%A7%80-%EA%B4%80%EB%A6%AC-2yy3zow8)
 
 <br>
 
