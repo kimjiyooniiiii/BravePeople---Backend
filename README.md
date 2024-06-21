@@ -27,7 +27,7 @@
 -	서버 로그를 팀원들과 공유하고 로그를 빠르게 추적하기 위해 Logback 설정 및 AWS CloudWatch로 로그 전송
 -	사용자의 이미지 업로드 서비스 제공을 위해 API 개발 및 AWS S3에 정적 이미지 파일 배포
 -	그외 회원가입, 로그인, 토큰 재발급, 로그아웃, 채팅방 나가기 API 개발
--	트러블 슈팅 : [ 채팅 읽음 여부 처리 ](https://velog.io/@wldbs35/%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%B1%84%ED%8C%85-%EC%8B%9C-%EB%A9%94%EC%8B%9C%EC%A7%80-%EC%9D%BD%EC%9D%8C-%EC%B2%98%EB%A6%AC-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0) , [ 사용자 독립적인 채팅 관리 ](https://velog.io/@wldbs35/%EC%82%AC%EC%9A%A9%EC%9E%90-%EB%B3%84-%EB%8F%85%EB%A6%BD%EC%A0%81%EC%9D%B8-%EC%B1%84%ED%8C%85%EB%A9%94%EC%8B%9C%EC%A7%80-%EA%B4%80%EB%A6%AC-2yy3zow8)
+-	트러블 슈팅 : [ 채팅 읽음 여부 처리 ](https://velog.io/@wldbs35/%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%B1%84%ED%8C%85-%EC%8B%9C-%EB%A9%94%EC%8B%9C%EC%A7%80-%EC%9D%BD%EC%9D%8C-%EC%B2%98%EB%A6%AC-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0) , [ 독립적인 사용자 채팅 관리 ](https://velog.io/@wldbs35/%EC%82%AC%EC%9A%A9%EC%9E%90-%EB%B3%84-%EB%8F%85%EB%A6%BD%EC%A0%81%EC%9D%B8-%EC%B1%84%ED%8C%85%EB%A9%94%EC%8B%9C%EC%A7%80-%EA%B4%80%EB%A6%AC-2yy3zow8)
 
 <br>
 
